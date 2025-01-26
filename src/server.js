@@ -1,0 +1,51 @@
+import express from "express";
+import { _config } from "./config/config.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import helmet from "helmet";
+import logger from "./utils/logger.js";
+import morgan from "morgan";
+import accessLogStream from "./utils/morgan.js";
+import errorHandler from "./middleware/errorHandler.js";
+import userRoutes from "./routes/userRoute.js";
+
+
+const app = express();
+
+const PORT = _config.PORT;
+
+app.use(cors());
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(helmet());
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {
+  stream: accessLogStream
+}));
+
+
+//health check
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
+});
+
+
+// //routes
+app.use("/api/v1/auth", userRoutes);
+
+app.use(errorHandler);
+app.listen(_config.PORT, () => {
+  logger.info(`User service is running on port ${PORT}`);
+  logger.info(`Database is running on port ${_config.DATABASE_URI}`);
+
+});
+
+
+//unhandle rejection
+process.on("unhandledRejection", (reason, promise) => {
+    logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+    throw reason;
+  });
+
+export default app;
