@@ -1,6 +1,7 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, timestamp, index, sql } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, index} from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const likes = pgTable(
     'likes',
@@ -15,3 +16,10 @@ export const likes = pgTable(
       userIdIdx: index('user_id_idx').on(table.userId),
     }]
   );
+
+  export const likeRelations = relations(likes, ({ one }) => ({
+    post: one(posts, {
+      fields: [likes.postId],
+      references: [posts.id],
+    }),
+  }));

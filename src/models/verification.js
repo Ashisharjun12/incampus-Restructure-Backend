@@ -1,6 +1,9 @@
 import { users } from './User.js';
-import { pgTable, uuid, varchar, timestamp, boolean, index, sql } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, boolean, index, pgEnum } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
+
+export const verificationTypeEnum = pgEnum('verification_type', ['email', 'password']);
 
 export const verificationTokens = pgTable(
   'verification_tokens',
@@ -8,7 +11,7 @@ export const verificationTokens = pgTable(
     id: uuid('id').primaryKey(),
     userId: uuid('user_id').references(() => users.id), // Foreign key to users
     token: varchar('token', { length: 64 }).notNull(),
-    type: varchar('type', { enum: ['email', 'password'] }).default('email'),
+    type: verificationTypeEnum('type').default('email'),
     isUsed: boolean('is_used').default(false),
     createdAt: timestamp('created_at').defaultNow(),
   },
@@ -18,3 +21,10 @@ export const verificationTokens = pgTable(
     isUsedIdx: index('is_used_idx').on(table.isUsed),
   }]
 );
+
+export const verificationTokenRelations = relations(verificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [verificationTokens.userId],
+    references: [users.id],
+  }),
+}));

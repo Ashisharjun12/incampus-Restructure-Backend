@@ -1,26 +1,25 @@
 CREATE TABLE "admins" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,
-	"role" varchar DEFAULT 'admin',
+	"role" varchar(12) DEFAULT 'admin' NOT NULL,
+	"refresh_token" varchar(255),
 	"is_active" boolean DEFAULT true,
 	"last_login" timestamp,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
-	CONSTRAINT "admins_id_unique" UNIQUE("id"),
 	CONSTRAINT "admins_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE "colleges" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"location" varchar(255) NOT NULL,
 	"created_by_id" uuid,
 	"is_active" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
-	CONSTRAINT "colleges_id_unique" UNIQUE("id"),
 	CONSTRAINT "colleges_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
@@ -88,7 +87,7 @@ CREATE TABLE "saved_posts" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(30),
 	"email" varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,

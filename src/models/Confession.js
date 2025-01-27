@@ -1,6 +1,9 @@
 import { users } from './User.js';
 import { colleges } from './College.js';
-import { pgTable, uuid, text, varchar, timestamp, index, sql } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
+export const statusEnum = pgEnum('status', ['active', 'deleted']);
 
 export const confessions = pgTable(
   'confessions',
@@ -9,7 +12,7 @@ export const confessions = pgTable(
     userId: uuid('user_id').references(() => users.id), // Foreign key to users (optional for anonymity)
     collegeId: uuid('college_id').references(() => colleges.id), // Foreign key to colleges
     content: text('content').notNull(),
-    status: varchar('status', { enum: ['active', 'deleted'] }).default('active'),
+    status: statusEnum('status').default('active'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -19,3 +22,10 @@ export const confessions = pgTable(
     createdAtIdx: index('created_at_idx').on(table.createdAt),
   }]
 );
+
+export const confessionRelations = relations(confessions, ({ one }) => ({
+  user: one(users, {
+    fields: [confessions.userId],
+    references: [users.id],
+  }),
+}));

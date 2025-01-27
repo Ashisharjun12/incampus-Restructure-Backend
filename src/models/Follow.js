@@ -1,5 +1,6 @@
 import { users } from './User.js';
 import { pgTable, uuid, timestamp,primaryKey } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const follows = pgTable(
   'follows',
@@ -17,3 +18,10 @@ export const follows = pgTable(
     pk: primaryKey(table.followerId, table.followeeId), // Composite primary key
   }]
 );
+
+export const followRelations = relations(follows, ({ one }) => ({
+  follower: one(users, {
+    fields: [follows.followerId],
+    references: [users.id],
+  }),
+}));

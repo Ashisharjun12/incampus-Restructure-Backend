@@ -1,6 +1,6 @@
 {
-  "id": "63548ede-a0bd-494d-969c-dd8dac616553",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "438894fc-4db8-4e89-8a08-48ff808e8be0",
+  "prevId": "d83af16b-0241-4de2-9e9b-2d1696937c3f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -17,19 +17,19 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
         "password": {
           "name": "password",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -42,7 +42,7 @@
         },
         "refresh_token": {
           "name": "refresh_token",
-          "type": "varchar(255)",
+          "type": "varchar(300)",
           "primaryKey": false,
           "notNull": false
         },
@@ -103,13 +103,13 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
         "location": {
           "name": "location",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
@@ -244,7 +244,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "comments_id_unique": {
+          "name": "comments_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -279,7 +287,8 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'active'"
@@ -502,7 +511,8 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'active'"
@@ -550,6 +560,58 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.media": {
+      "name": "media",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "post_id": {
+          "name": "post_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "media_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "media_post_id_posts_id_fk": {
+          "name": "media_post_id_posts_id_fk",
+          "tableFrom": "media",
+          "tableTo": "posts",
+          "columnsFrom": [
+            "post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.posts": {
       "name": "posts",
       "schema": "",
@@ -572,15 +634,16 @@
           "primaryKey": false,
           "notNull": false
         },
-        "media": {
-          "name": "media",
-          "type": "jsonb",
+        "media_id": {
+          "name": "media_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "visibility": {
           "name": "visibility",
-          "type": "varchar",
+          "type": "visibility",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'public'"
@@ -594,7 +657,8 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'active'"
@@ -629,6 +693,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "posts_media_id_media_id_fk": {
+          "name": "posts_media_id_media_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "media",
+          "columnsFrom": [
+            "media_id"
           ],
           "columnsTo": [
             "id"
@@ -727,13 +804,13 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
         "password": {
           "name": "password",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -745,15 +822,24 @@
         },
         "gender": {
           "name": "gender",
-          "type": "varchar",
+          "type": "gender",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'preferNotToSay'"
         },
         "age": {
           "name": "age",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
         },
         "college_id": {
           "name": "college_id",
@@ -770,7 +856,7 @@
         },
         "verification_token": {
           "name": "verification_token",
-          "type": "varchar(64)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": false
         },
@@ -789,7 +875,8 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'active'"
@@ -884,7 +971,8 @@
         },
         "type": {
           "name": "type",
-          "type": "varchar",
+          "type": "verification_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'email'"
@@ -927,7 +1015,51 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "active",
+        "suspended",
+        "banned"
+      ]
+    },
+    "public.media_type": {
+      "name": "media_type",
+      "schema": "public",
+      "values": [
+        "image",
+        "gif"
+      ]
+    },
+    "public.visibility": {
+      "name": "visibility",
+      "schema": "public",
+      "values": [
+        "public",
+        "private"
+      ]
+    },
+    "public.gender": {
+      "name": "gender",
+      "schema": "public",
+      "values": [
+        "male",
+        "female",
+        "other",
+        "preferNotToSay"
+      ]
+    },
+    "public.verification_type": {
+      "name": "verification_type",
+      "schema": "public",
+      "values": [
+        "email",
+        "password"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

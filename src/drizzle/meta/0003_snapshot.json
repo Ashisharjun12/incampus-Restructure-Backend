@@ -1,6 +1,6 @@
 {
-  "id": "63548ede-a0bd-494d-969c-dd8dac616553",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "d83af16b-0241-4de2-9e9b-2d1696937c3f",
+  "prevId": "c982e5b2-6ae6-4564-b493-4cf7b7d89cc6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -17,19 +17,19 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
         "password": {
           "name": "password",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -42,7 +42,7 @@
         },
         "refresh_token": {
           "name": "refresh_token",
-          "type": "varchar(255)",
+          "type": "varchar(300)",
           "primaryKey": false,
           "notNull": false
         },
@@ -103,13 +103,13 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
         "location": {
           "name": "location",
-          "type": "varchar(255)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
@@ -727,13 +727,13 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
         "password": {
           "name": "password",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -755,6 +755,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "role": {
+          "name": "role",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
+        },
         "college_id": {
           "name": "college_id",
           "type": "uuid",
@@ -770,7 +777,7 @@
         },
         "verification_token": {
           "name": "verification_token",
-          "type": "varchar(64)",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": false
         },

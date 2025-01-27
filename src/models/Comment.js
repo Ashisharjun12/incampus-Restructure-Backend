@@ -1,11 +1,12 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, text, timestamp, index, sql } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const comments = pgTable(
     'comments',
     {
-      id: uuid('id').primaryKey(),
+      id: uuid('id').primaryKey().unique(),
       postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
       authorId: uuid('author_id').references(() => users.id), // Foreign key to users
       content: text('content').notNull(),
@@ -17,3 +18,10 @@ export const comments = pgTable(
       authorIdIdx: index('author_id_idx').on(table.authorId),
     }]
   );
+
+  export const commentRelations = relations(comments, ({ one }) => ({
+    post: one(posts, {
+      fields: [comments.postId],
+      references: [posts.id],
+    }),
+  }));    

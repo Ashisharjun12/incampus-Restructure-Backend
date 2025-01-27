@@ -8,6 +8,7 @@ import morgan from "morgan";
 import accessLogStream from "./utils/morgan.js";
 import errorHandler from "./middleware/errorHandler.js";
 import userRoutes from "./routes/userRoute.js";
+import adminRoutes from "./routes/adminRoute.js"
 
 
 const app = express();
@@ -33,6 +34,7 @@ app.get("/health", (req, res) => {
 
 // //routes
 app.use("/api/v1/auth", userRoutes);
+app.use("/api/v1/admin" ,adminRoutes)
 
 app.use(errorHandler);
 app.listen(_config.PORT, () => {

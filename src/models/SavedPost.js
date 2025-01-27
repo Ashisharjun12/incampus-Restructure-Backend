@@ -1,6 +1,7 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, timestamp, index, sql } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, index} from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const savedPosts = pgTable(
     'saved_posts',
@@ -15,3 +16,10 @@ export const savedPosts = pgTable(
       userIdIdx: index('user_id_idx').on(table.userId),
     }]
   );
+
+  export const savedPostRelations = relations(savedPosts, ({ one }) => ({
+    post: one(posts, {
+      fields: [savedPosts.postId],
+      references: [posts.id],
+    }),
+  }));
