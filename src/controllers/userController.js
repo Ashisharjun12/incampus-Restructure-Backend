@@ -2,7 +2,7 @@ import { db } from "../config/database.js";
 import logger from "../utils/logger.js";
 import { colleges } from "../models/College.js";
 import { users } from "../models/User.js";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../services/emaiService.js";
 import jwt from "jsonwebtoken";
@@ -29,7 +29,6 @@ const generateAccessRefreshToken = async (userPayload) => {
     .update(users)
     .set({
       refreshToken: refreshToken,
-      refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), //7days
     })
     .where(eq(users.id, userPayload.id));
 
@@ -143,11 +142,78 @@ export const RegisterUser = async (req, res) => {
 export const LoginUser = async (req, res) => {
   try {
     logger.info("Login user endpoint hit");
-  } catch (error) {}
+    const { email, password, username } = req.body;
 
-  res.status(200).json({
-    message: "User logged in successfully",
-  });
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required",
+      });
+    }
+
+    // Build the where condition based on provided credentials
+    let whereCondition;
+    if (email) {
+      whereCondition = eq(users.email, email);
+    } else if (username) {
+      whereCondition = eq(users.username, username);
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Either email or username is required",
+      });
+    }
+
+    //check if user exists
+    const [findUser] = await db.select().from(users).where(whereCondition);
+    if (!findUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+    }
+
+    //check if password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, findUser.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+
+    //update refresh token expiry date
+    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); //7days
+
+    //update refresh token expiry date in database
+    await db
+      .update(users)
+      .set({ refreshTokenExpiry: refreshTokenExpiry })
+      .where(eq(users.id, findUser.id));
+
+    //generate access and refresh token
+    const { accessToken, refreshToken } = await generateAccessRefreshToken(
+      findUser
+    );
+
+    //set cookie
+    res.cookie("access_token", accessToken);
+    res.cookie("refresh_token", refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged in successfully",
+      data: findUser,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
+  } catch (error) {
+    logger.error(error, "Error in logging in user");
+    return res.status(500).json({
+      success: false,
+      message: "Error in logging in user",
+    });
+  }
 };
 
 export const verifyEmail = async (req, res) => {
@@ -179,7 +245,9 @@ export const verifyEmail = async (req, res) => {
       .returning();
 
     // Generate access and refresh token
-    const { accessToken, refreshToken } = await generateAccessRefreshToken(createdUser);
+    const { accessToken, refreshToken } = await generateAccessRefreshToken(
+      createdUser
+    );
 
     return res.status(200).json({
       success: true,
@@ -230,12 +298,34 @@ export const ResetPassword = async (req, res) => {
 export const LogoutUser = async (req, res) => {
   try {
     logger.info("Logout user endpoint hit");
-  } catch (error) {}
+    const userId = req.user.id;
 
-  res.status(200).json({
-    message: "User logged out successfully",
-    data: user,
-  });
+    //clear cookie
+    res.clearCookie("access_Token");
+    res.clearCookie("refresh_Token");
+
+    //update refresh token in database
+    await db
+      .update(users)
+      .set({
+        refreshToken: null,
+        isActive: false,
+        lastActive: new Date(),
+        refreshTokenExpiry: null,
+      })
+      .where(eq(users.id, userId));
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    logger.error(error, "Error in logging out user");
+    return res.status(500).json({
+      success: false,
+      message: "Error in logging out user",
+    });
+  }
 };
 
 //generate username

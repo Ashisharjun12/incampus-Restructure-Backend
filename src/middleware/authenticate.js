@@ -7,7 +7,7 @@ import logger from "../utils/logger.js";
 import { eq } from "drizzle-orm";
 
 export const authenticateUser = async (req, res, next) => {
-  logger.info("Authenticating request...");
+  logger.info("Authenticating request user...");
   let token = null;
   if (req.cookies?.access_token) {
     token = req.cookies.access_token;
