@@ -10,6 +10,12 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../services/tokenService.js";
+import {
+  uniqueNamesGenerator,
+  adjectives,
+  colors,
+  animals,
+} from "unique-names-generator";
 
 const generateAccessRefreshToken = async (userPayload) => {
   logger.info("Generating access and refresh token user...");
@@ -268,11 +274,46 @@ export const verifyEmail = async (req, res) => {
 export const ResendVerificationEmail = async (req, res) => {
   try {
     logger.info("Resend verification email endpoint hit");
-  } catch (error) {}
 
-  res.status(200).json({
-    message: "Verification email resent successfully",
-  });
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    //check if user exists
+    const [findUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    if (!findUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+    }
+
+    //get activation token
+    const activationToken = createActivationToken(findUser);
+    const activationOtp = activationToken.otp;
+
+    //send activation email
+    await sendVerificationEmail(findUser.email, activationOtp);
+
+    return res.status(200).json({
+      success: true,
+      message: "Activation email sent successfully",
+    });
+  } catch (error) {
+    logger.error(error, "Error in resending verification email");
+    return res.status(500).json({
+      success: false,
+      message: "Error in resending verification email",
+    });
+  }
 };
 
 export const ForgotPassword = async (req, res) => {
@@ -333,10 +374,42 @@ export const LogoutUser = async (req, res) => {
 export const generateUsername = async (req, res) => {
   try {
     logger.info("Generate username endpoint hit");
-  } catch (error) {}
-  res.status(200).json({
-    message: "Username generated successfully",
-  });
+    const randomName = uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, animals],
+      separator: "",
+      style: "capital",
+      length: 3,
+    });
+
+    //check if username already exists
+    const [findUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, randomName));
+    if (findUser) {
+      //generate new username
+      const newUsername = `${randomName}${Math.floor(
+        1000 + Math.random() * 9000
+      )}`;
+      return res.status(400).json({
+        success: false,
+        message: "Username already exists",
+        data: newUsername,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Username generated successfully",
+      data: randomName,
+    });
+  } catch (error) {
+    logger.error(error, "Error in generating username");
+    return res.status(500).json({
+      success: false,
+      message: "Error in generating username",
+    });
+  }
 };
 
 //get user profile

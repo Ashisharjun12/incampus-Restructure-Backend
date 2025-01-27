@@ -12,7 +12,7 @@ router.post("/resend-verification-email", ResendVerificationEmail);
 router.post("/forgot-password", ForgotPassword);
 router.post("/reset-password", ResetPassword);
 router.post("/logout",authenticateUser ,LogoutUser);
-router.get("/generate-username", generateUsername);
+router.post("/generate-username", generateUsername);
 router.get("/profile", authenticateUser ,getUserProfile);
 
 
