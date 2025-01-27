@@ -412,15 +412,64 @@ export const generateUsername = async (req, res) => {
   }
 };
 
-//get user profile
+//get single user by id
 
-export const getUserProfile = async (req, res) => {
+export const getUserById = async (req, res) => {
   try {
     logger.info("Get user profile endpoint hit");
-  } catch (error) {}
-  res.status(200).json({
-    message: "User profile fetched successfully",
-  });
+    const userId = req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const [getUserById] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!getUserById) {
+      return res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile fetched successfully",
+      data: getUserById,
+    });
+  } catch (error) {
+    logger.error(error, "Error in getting user by id");
+    return res.status(500).json({
+      success: false,
+      message: "Error in getting user by id",
+    });
+  }
 };
 
-//update user profile
+//get all users
+export const getAllUsers = async (req, res) => {
+  try {
+    logger.info("Get all users endpoint hit");
+
+    const getAllUsers = await db.select().from(users);
+
+    return res.status(200).json({
+      success: true,
+      message: "All users fetched successfully",
+      data: getAllUsers,
+      count: getAllUsers.length,
+    });
+  } catch (error) {
+    logger.error(error, "Error in getting all users");
+    return res.status(500).json({
+      success: false,
+      message: "Error in getting all users",
+    });
+  }
+};
