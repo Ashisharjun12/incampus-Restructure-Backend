@@ -1,40 +1,47 @@
 import logger from "../utils/logger.js"
-import {db} from "../utils/database.js"
+import {db} from "../config/database.js"
 import {colleges} from "../models/College.js"
-
+import { eq } from "drizzle-orm";
 
 export const createCollege = async (req, res) => {
     try {
         logger.info("College creation route hit...");
+
         const {name, location} = req.body;
+
+          //get admin id from admin middleware
+          const adminId = req.admin.id;
 
         if(!name || !location) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
             });
-
         }
 
-        const collegeExists = await db.select().from(colleges).where(eq(colleges.name, name));
-        if(collegeExists.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: "College already exists",
-            });
-        }
+ //check if college already exists
+ const collegeExists = await db.select().from(colleges).where(eq(colleges.name, name));
+ if(collegeExists.length > 0) {
+     return res.status(400).json({
+         success: false,
+         message: "College already exists",
+     });
+ }
 
-        //create college
-        const newCollege = await db.insert(colleges).values({
-            name,
-            location,
-        });
-        return res.status(201).json({
-            success: true,
-            message: "College created successfully",
-            data: newCollege,
-        });
-        
+ //create college
+ const [newCollege] = await db.insert(colleges).values({
+    name,
+    location,
+    createdById: adminId,
+ }).returning();
+
+
+ return res.status(201).json({
+    success: true,
+    message: "College created successfully",
+    data: newCollege,
+ });
+
     } catch (error) {
         logger.error(error, "Error in creating college");
         res.status(500).json({
@@ -43,3 +50,53 @@ export const createCollege = async (req, res) => {
         });
     }
 }
+
+export const getCollege = async(req,res)=>{
+    try {
+        logger.info("Get college route hit...");
+
+        const findAllCollges = await db.select().from(colleges)
+
+        return res.json({
+            success: true,
+            message: "College fetched successfully",
+            data: findAllCollges,
+        });
+
+        
+    } catch (error) {
+        logger.error(error, "Error in getting college");
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+        
+    }
+
+}
+
+export const getCollegeById = async(req,res)=>{
+    try {
+        logger.info("Get college by id route hit...");
+
+        const {id} = req.params;
+
+        const findCollegeById = await db.select().from(colleges).where(eq(colleges.id, id));
+
+        return res.json({
+            success: true,
+            message: "College fetched successfully",
+            data: findCollegeById,
+        });
+        
+    } catch (error) {
+        logger.error(error, "Error in getting college by id");
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+        
+    }
+}
+
+
