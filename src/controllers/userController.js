@@ -1,144 +1,263 @@
-
-import {db }from "../config/database.js";
+import { db } from "../config/database.js";
 import logger from "../utils/logger.js";
+import { colleges } from "../models/College.js";
+import { users } from "../models/User.js";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt";
+import { sendVerificationEmail } from "../services/emaiService.js";
+import jwt from "jsonwebtoken";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../services/tokenService.js";
+
+const generateAccessRefreshToken = async (userPayload) => {
+  logger.info("Generating access and refresh token user...");
+  const accessToken = generateAccessToken({
+    id: userPayload.id,
+    email: userPayload.email,
+    role: userPayload.role,
+  });
+  const refreshToken = generateRefreshToken({
+    id: userPayload.id,
+    email: userPayload.email,
+    role: userPayload.role,
+  });
+
+  //update refresh token in database
+  await db
+    .update(users)
+    .set({
+      refreshToken: refreshToken,
+      refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), //7days
+    })
+    .where(eq(users.id, userPayload.id));
+
+  return { accessToken, refreshToken };
+};
+
+const createActivationToken = (userdata) => {
+  const otp = Math.floor(10000 + Math.random() * 90000).toString();
+
+  const token = jwt.sign(
+    { userdata, otp },
+    process.env.ACTIVATION_TOKEN_SECRET,
+    { expiresIn: "5m" }
+  );
+  return { otp, token };
+};
 
 export const RegisterUser = async (req, res) => {
-    try {
-        logger.info("Creating user endpoint hit");
-        
-    } catch (error) {
-        
+  try {
+    logger.info("Creating user endpoint hit");
+    const { username, email, password, avatar, gender, age, college } =
+      req.body;
+
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !avatar ||
+      !gender ||
+      !age ||
+      !college
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    res.status(200).json({
-        message: "User created successfully",
-        
+    //check if college exists
+    const findCollege = await db
+      .select()
+      .from(colleges)
+      .where(eq(colleges.id, college));
+
+    if (findCollege.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "College does not exist",
+      });
+    }
+
+    //check if user already exists
+    const findUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (findUser.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    //hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const userdata = {
+      username,
+      email,
+      password: hashedPassword,
+      avatar,
+      gender,
+      age,
+      collegeId: college,
+      role: "user",
+    };
+
+    //get activation token
+    const activationToken = createActivationToken(userdata);
+    const activationOtp = activationToken.otp;
+
+    //send activation email
+    try {
+      await sendVerificationEmail(userdata.email, activationOtp);
+
+      return res.status(200).json({
+        success: true,
+        message: "Activation email sent successfully",
+        data: userdata,
+        activationToken: activationToken,
+        activationOtp: activationOtp,
+        activationEmail: userdata.email,
+      });
+    } catch (error) {
+      logger.error(error, "Error in sending activation email");
+      return res.status(500).json({
+        success: false,
+        message: "Error in sending activation email",
+      });
+    }
+  } catch (error) {
+    logger.error(error, "Error in creating user");
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
-}
+  }
+};
 
 export const LoginUser = async (req, res) => {
-    try {
-        logger.info("Login user endpoint hit");
-        
-    } catch (error) {
-        
-    }
+  try {
+    logger.info("Login user endpoint hit");
+  } catch (error) {}
 
-    res.status(200).json({
-        message: "User logged in successfully",
-       
-    });
-}
-
+  res.status(200).json({
+    message: "User logged in successfully",
+  });
+};
 
 export const verifyEmail = async (req, res) => {
-    try {
-        logger.info("Verify email endpoint hit");
-        
-    } catch (error) {
-        
+  try {
+    logger.info("Verify email endpoint hit");
+
+    const { token, otp } = req.body;
+
+    const newUser = jwt.verify(token, process.env.ACTIVATION_TOKEN_SECRET);
+
+    if (newUser.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
     }
 
-    res.status(200).json({
-        message: "Email verified successfully",
-       
-    });
-}
+    // Generate refresh token expiry date
+    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); //7days
 
+    // Create user with refresh token data
+    const [createdUser] = await db
+      .insert(users)
+      .values({
+        ...newUser.userdata,
+        isVerified: true,
+        refreshTokenExpiry: refreshTokenExpiry,
+      })
+      .returning();
+
+    // Generate access and refresh token
+    const { accessToken, refreshToken } = await generateAccessRefreshToken(createdUser);
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+      data: createdUser,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
+  } catch (error) {
+    logger.error(error, "Error in verifying email");
+    return res.status(500).json({
+      success: false,
+      message: "Error in verifying email",
+    });
+  }
+};
 
 export const ResendVerificationEmail = async (req, res) => {
-    try {
-        logger.info("Resend verification email endpoint hit");
-        
-    } catch (error) {
-        
-    }
+  try {
+    logger.info("Resend verification email endpoint hit");
+  } catch (error) {}
 
-    res.status(200).json({
-        message: "Verification email resent successfully",
-       
-    });
-}
-
+  res.status(200).json({
+    message: "Verification email resent successfully",
+  });
+};
 
 export const ForgotPassword = async (req, res) => {
-    try {
-        logger.info("Forgot password endpoint hit");
-        
-    } catch (error) {
-        
-    }
+  try {
+    logger.info("Forgot password endpoint hit");
+  } catch (error) {}
 
-    res.status(200).json({
-        message: "Password reset email sent successfully",
-        
-    });
-}
+  res.status(200).json({
+    message: "Password reset email sent successfully",
+  });
+};
 
 export const ResetPassword = async (req, res) => {
-    try {
-        logger.info("Reset password endpoint hit");
-        
-    } catch (error) {
-        
-    }
+  try {
+    logger.info("Reset password endpoint hit");
+  } catch (error) {}
 
-    res.status(200).json({
-        message: "Password reset successfully",
-       
-    });
-}
-
+  res.status(200).json({
+    message: "Password reset successfully",
+  });
+};
 
 export const LogoutUser = async (req, res) => {
-    try {
-        logger.info("Logout user endpoint hit");
-        
-    } catch (error) {
-        
-    }
+  try {
+    logger.info("Logout user endpoint hit");
+  } catch (error) {}
 
-    res.status(200).json({
-        message: "User logged out successfully",
-        data: user
-    });
-}
-
-
+  res.status(200).json({
+    message: "User logged out successfully",
+    data: user,
+  });
+};
 
 //generate username
 
 export const generateUsername = async (req, res) => {
-    try {
-        logger.info("Generate username endpoint hit");
-        
-    } catch (error) {
-        
-    }
-    res.status(200).json({
-        message: "Username generated successfully",
-       
-    });
-}
-
+  try {
+    logger.info("Generate username endpoint hit");
+  } catch (error) {}
+  res.status(200).json({
+    message: "Username generated successfully",
+  });
+};
 
 //get user profile
 
 export const getUserProfile = async (req, res) => {
-    try {
-        logger.info("Get user profile endpoint hit");
-        
-    } catch (error) {
-        
-    }
-    res.status(200).json({
-        message: "User profile fetched successfully",
-      
-    });
-}
+  try {
+    logger.info("Get user profile endpoint hit");
+  } catch (error) {}
+  res.status(200).json({
+    message: "User profile fetched successfully",
+  });
+};
 
 //update user profile
-
-
-
-

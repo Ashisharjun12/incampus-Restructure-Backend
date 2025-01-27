@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1737933559391,
-      "tag": "0000_sturdy_polaris",
+      "when": 1737975283766,
+      "tag": "0000_milky_gravity",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1737933845674,
-      "tag": "0001_tearful_warbound",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1737934017756,
-      "tag": "0002_high_red_wolf",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1737934197520,
-      "tag": "0003_majestic_silver_samurai",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1737937308177,
-      "tag": "0004_luxuriant_infant_terrible",
+      "when": 1737975736768,
+      "tag": "0001_redundant_human_torch",
       "breakpoints": true
     }
   ]

@@ -24,8 +24,8 @@ export const users = pgTable(
       role: varchar("role", { length: 12 }).notNull().default("user"),
       collegeId: uuid('college_id').references(() => colleges.id), // Foreign key to colleges
       isVerified: boolean('is_verified').default(false),
-      verificationToken: varchar('verification_token', { length: 100 }),
-      verificationTokenExpiry: timestamp('verification_token_expiry'),
+      refreshToken: varchar('refresh_token', { length: 512 }),
+      refreshTokenExpiry: timestamp('refresh_token_expiry'),
       lastActive: timestamp('last_active').defaultNow(),
       status: statusEnum('status').default('active'),
       isTemporary: boolean('is_temporary').default(false),

@@ -7,7 +7,7 @@ export const statusEnum = pgEnum('status', ['active', 'deleted']);
 
 export const mediaTypeEnum = pgEnum('media_type', ['image', 'gif']);
 export const mediaTable = pgTable('media', {
-    id: serial('id').primaryKey(),
+    id: uuid('id').primaryKey(),
     postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
     type: mediaTypeEnum('type').notNull(),
     url: varchar('url', { length: 100 }).notNull()
@@ -19,7 +19,7 @@ export const posts = pgTable(
       id: uuid('id').primaryKey(),
       authorId: uuid('author_id').references(() => users.id), // Foreign key to users
       content: text('content'),
-      mediaId: uuid('media_id').references(() => mediaTable.id), // Foreign key to media
+      mediaId: uuid('media_id').references(() => mediaTable.id), // Changed from serial to uuid
       visibility: visibilityEnum('visibility').default('public'),
       isEdited: boolean('is_edited').default(false),
       status: statusEnum('status').default('active'),
