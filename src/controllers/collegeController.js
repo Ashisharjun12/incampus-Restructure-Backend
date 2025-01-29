@@ -51,6 +51,63 @@ export const createCollege = async (req, res) => {
     }
 }
 
+export const updateCollege = async(req,res)=>{
+    try {
+        logger.info("Update college route hit...");
+
+        const {id} = req.params;
+        const {name, location} = req.body;
+
+        if(!name && !location) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
+
+        const [updatedCollege] = await db.update(colleges).set({
+            name,
+            location,
+        }).where(eq(colleges.id, id)).returning();
+
+        return res.status(200).json({
+            success: true,
+            message: "College updated successfully",
+            data: updatedCollege,
+        });
+
+    } catch (error) {
+        logger.error(error, "Error in updating college");
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+
+}
+
+export const deleteCollegeById = async(req,res)=>{
+    try {
+        logger.info("Delete college route hit...");
+
+        const {id} = req.params;
+
+
+        await db.delete(colleges).where(eq(colleges.id, id));
+
+        return res.status(200).json({
+            success: true,
+            message: "College deleted successfully",
+        });
+    } catch (error) {
+        logger.error(error, "Error in deleting college");
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+}
+
 export const getCollege = async(req,res)=>{
     try {
         logger.info("Get college route hit...");

@@ -42,7 +42,7 @@ const generateAccessRefreshToken = async (userPayload) => {
 };
 
 const createActivationToken = (userdata) => {
-  const otp = Math.floor(10000 + Math.random() * 90000).toString();
+  const otp = Math.floor(100000 + Math.random() * 90000).toString(); //6 digit otp
 
   const token = jwt.sign(
     { userdata, otp },
@@ -394,14 +394,14 @@ export const generateUsername = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Username already exists",
-        data: newUsername,
+        username: newUsername,
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Username generated successfully",
-      data: randomName,
+      username: randomName,
     });
   } catch (error) {
     logger.error(error, "Error in generating username");

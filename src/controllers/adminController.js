@@ -142,6 +142,12 @@ export const loginAdmin = async (req, res) => {
     res.cookie("access_token", accessToken);
     res.cookie("refresh_token", refreshToken);
 
+    //set is active true is in db
+    await db
+      .update(admins)
+      .set({ isActive: true })
+      .where(eq(admins.id, admin.id));
+
     return res.status(200).json({
       success: true,
       message: "Admin logged in successfully",
