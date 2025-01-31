@@ -1,8 +1,8 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, index, integer, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-
+import { replies } from './Reply.js';
 
 export const comments = pgTable(
   'comments',
@@ -11,6 +11,9 @@ export const comments = pgTable(
     postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
     authorId: uuid('author_id').references(() => users.id), // Foreign key to users
     content: text('content').notNull(),
+    isEdited: boolean('is_edited').default(false),
+    commentLikesCount: integer('comment_likes_count').default(0),
+    commentRepliesCount: integer('comment_replies_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -20,7 +23,7 @@ export const comments = pgTable(
   }]
 );
 
-export const commentRelations = relations(comments, ({ one }) => ({
+export const commentRelations = relations(comments, ({ one, many }) => ({
   post: one(posts, {
     fields: [comments.postId],
     references: [posts.id],
@@ -28,5 +31,9 @@ export const commentRelations = relations(comments, ({ one }) => ({
   author: one(users, {
     fields: [comments.authorId],
     references: [users.id],
+  }),
+  replies: many(replies, {
+    fields: [comments.id],
+    references: [replies.commentId],
   }),
 }));

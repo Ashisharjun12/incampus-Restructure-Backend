@@ -1,10 +1,12 @@
 import { users } from './User.js';
-import { pgTable, uuid, timestamp,primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, primaryKey } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
 
 export const follows = pgTable(
   'follows',
   {
+    id: uuid('id').primaryKey().defaultRandom(),
     followerId: uuid('follower_id')
       .references(() => users.id)
       .notNull(),
@@ -23,5 +25,11 @@ export const followRelations = relations(follows, ({ one }) => ({
   follower: one(users, {
     fields: [follows.followerId],
     references: [users.id],
+    relationName: 'follower',
+  }),
+  followee: one(users, {
+    fields: [follows.followeeId],
+    references: [users.id],
+    relationName: 'followee',
   }),
 }));

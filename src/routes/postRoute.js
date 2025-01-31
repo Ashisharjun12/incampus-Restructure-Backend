@@ -1,8 +1,16 @@
 import { Router } from "express";
-import { createPost , getAllPosts, getPostById, getPostByAuthorId, deletePostById, getPostByUserId, updatePostById} from "../controllers/postController.js";
+import {
+  createPost,
+  getAllPosts,
+  getPostById,
+  getPostByAuthorId,
+  deletePostById,
+  getPostByUserId,
+  updatePostById,
+  likePost,
+} from "../controllers/postController.js";
 import { authenticateUser } from "../middleware/authenticate.js";
 import { upload } from "../utils/multer.js";
-
 
 const router = Router();
 
@@ -17,7 +25,7 @@ router.delete("/delete/:id", deletePostById);
 router.get("/get-post-by-author/:id", authenticateUser, getPostByUserId);
 router.put("/update/:id", authenticateUser, updatePostById);
 
-
-
+//like post
+router.post("/:id/like", authenticateUser, likePost);
 
 export default router;

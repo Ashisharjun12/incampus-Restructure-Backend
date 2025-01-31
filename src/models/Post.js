@@ -22,7 +22,7 @@ export const posts = pgTable(
     commentsCount: integer('comments_count').default(0),
     isEdited: boolean('is_edited').default(false),
     status: StatusEnum('status').default('active'),
-    isSaved: boolean('is_saved').default(false),
+    savedPostCount: integer('saved_post_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -39,6 +39,7 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   author: one(users, {
     fields: [posts.authorId],
     references: [users.id],
+
   }),
   likes: many(likes, {
     relationName: 'post_likes',

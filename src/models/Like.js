@@ -6,7 +6,7 @@ import { relations } from 'drizzle-orm';
 export const likes = pgTable(
   'likes',
   {
-    id: uuid('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
     userId: uuid('user_id').references(() => users.id), // Foreign key to users
     createdAt: timestamp('created_at').defaultNow(),

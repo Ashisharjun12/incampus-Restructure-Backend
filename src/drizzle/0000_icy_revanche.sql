@@ -28,6 +28,9 @@ CREATE TABLE "comments" (
 	"post_id" uuid,
 	"author_id" uuid,
 	"content" text NOT NULL,
+	"is_edited" boolean DEFAULT false,
+	"comment_likes_count" integer DEFAULT 0,
+	"comment_replies_count" integer DEFAULT 0,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "comments_id_unique" UNIQUE("id")
@@ -38,12 +41,16 @@ CREATE TABLE "confessions" (
 	"user_id" uuid,
 	"college_id" uuid,
 	"content" text NOT NULL,
+	"is_edited" boolean DEFAULT false,
+	"confession_likes_count" integer DEFAULT 0,
+	"confession_comments_count" integer DEFAULT 0,
 	"status" "status" DEFAULT 'active',
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "follows" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"follower_id" uuid NOT NULL,
 	"followee_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT now(),
@@ -51,7 +58,7 @@ CREATE TABLE "follows" (
 );
 --> statement-breakpoint
 CREATE TABLE "likes" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid,
 	"user_id" uuid,
 	"created_at" timestamp DEFAULT now()
@@ -74,9 +81,22 @@ CREATE TABLE "posts" (
 	"media_type" "media_type" DEFAULT 'image',
 	"media" jsonb,
 	"visibility" "visibility" DEFAULT 'public',
+	"likes_count" integer DEFAULT 0,
+	"comments_count" integer DEFAULT 0,
 	"is_edited" boolean DEFAULT false,
 	"status" "status" DEFAULT 'active',
-	"is_saved" boolean DEFAULT false,
+	"saved_post_count" integer DEFAULT 0,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "replies" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"comment_id" uuid,
+	"author_id" uuid,
+	"content" text NOT NULL,
+	"is_edited" boolean DEFAULT false,
+	"reply_likes_count" integer DEFAULT 0,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
@@ -92,6 +112,7 @@ CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(30),
 	"email" varchar(100) NOT NULL,
+	"verified_badge" boolean DEFAULT false,
 	"password" varchar(100) NOT NULL,
 	"avatar" text,
 	"gender" "gender" DEFAULT 'preferNotToSay',
@@ -106,6 +127,8 @@ CREATE TABLE "users" (
 	"status" "status" DEFAULT 'active',
 	"is_temporary" boolean DEFAULT false,
 	"allow_dms" boolean DEFAULT true,
+	"follower_count" integer DEFAULT 0,
+	"following_count" integer DEFAULT 0,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "users_username_unique" UNIQUE("username"),
@@ -124,6 +147,8 @@ ALTER TABLE "likes" ADD CONSTRAINT "likes_user_id_users_id_fk" FOREIGN KEY ("use
 ALTER TABLE "direct_messages" ADD CONSTRAINT "direct_messages_sender_id_users_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "direct_messages" ADD CONSTRAINT "direct_messages_receiver_id_users_id_fk" FOREIGN KEY ("receiver_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "replies" ADD CONSTRAINT "replies_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "replies" ADD CONSTRAINT "replies_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "saved_posts" ADD CONSTRAINT "saved_posts_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "saved_posts" ADD CONSTRAINT "saved_posts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_college_id_colleges_id_fk" FOREIGN KEY ("college_id") REFERENCES "public"."colleges"("id") ON DELETE no action ON UPDATE no action;

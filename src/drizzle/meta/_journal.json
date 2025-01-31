@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1738294367353,
-      "tag": "0000_safe_ironclad",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1738320542575,
-      "tag": "0001_noisy_unicorn",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1738320925884,
-      "tag": "0002_large_colossus",
+      "when": 1738354309005,
+      "tag": "0000_icy_revanche",
       "breakpoints": true
     }
   ]
