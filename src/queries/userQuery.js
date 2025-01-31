@@ -4,11 +4,12 @@ import { users } from "../models/User.js";
 import logger from "../utils/logger.js";
 import { colleges } from "../models/College.js";
 
+//search user by username and college name
 export const searchUser = async (req, res) => {
   try {
     const query = req.query.q?.toString().trim() || "";
     logger.info(`Searching for user with query: ${query}`);
-    
+
     if (!query) {
       return res.status(400).json({ message: "Query is required" });
     }
@@ -29,14 +30,16 @@ export const searchUser = async (req, res) => {
           like(colleges.name, `%${query}%`)
         )
       );
-    
+
     logger.info(`Found ${result.length} users matching query: ${query}`);
-    res.status(200).json({ 
-      message: "User search successful", 
-      data: result 
+    res.status(200).json({
+      message: "User search successful",
+      data: result,
     });
   } catch (error) {
     logger.error(`Error searching for user: ${error.message}`);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+

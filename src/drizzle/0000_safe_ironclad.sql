@@ -1,7 +1,3 @@
-CREATE TYPE "public"."status" AS ENUM('active', 'suspended', 'banned');--> statement-breakpoint
-CREATE TYPE "public"."media_type" AS ENUM('image', 'gif');--> statement-breakpoint
-CREATE TYPE "public"."visibility" AS ENUM('public', 'private');--> statement-breakpoint
-CREATE TYPE "public"."gender" AS ENUM('male', 'female', 'other', 'preferNotToSay');--> statement-breakpoint
 CREATE TABLE "admins" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(50) NOT NULL,
@@ -71,18 +67,12 @@ CREATE TABLE "direct_messages" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "media" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"post_id" uuid,
-	"type" "media_type" NOT NULL,
-	"url" varchar(100) NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "posts" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"author_id" uuid,
 	"content" text,
-	"media_id" uuid,
+	"media_type" "media_type" DEFAULT 'image',
+	"media" jsonb,
 	"visibility" "visibility" DEFAULT 'public',
 	"is_edited" boolean DEFAULT false,
 	"status" "status" DEFAULT 'active',
@@ -106,10 +96,11 @@ CREATE TABLE "users" (
 	"avatar" text,
 	"gender" "gender" DEFAULT 'preferNotToSay',
 	"age" integer,
+	"bio" text DEFAULT 'Place your bio here',
 	"role" varchar(12) DEFAULT 'user' NOT NULL,
 	"college_id" uuid,
 	"is_verified" boolean DEFAULT false,
-	"refresh_token" varchar(255),
+	"refresh_token" varchar(512),
 	"refresh_token_expiry" timestamp,
 	"last_active" timestamp DEFAULT now(),
 	"status" "status" DEFAULT 'active',
@@ -132,9 +123,7 @@ ALTER TABLE "likes" ADD CONSTRAINT "likes_post_id_posts_id_fk" FOREIGN KEY ("pos
 ALTER TABLE "likes" ADD CONSTRAINT "likes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "direct_messages" ADD CONSTRAINT "direct_messages_sender_id_users_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "direct_messages" ADD CONSTRAINT "direct_messages_receiver_id_users_id_fk" FOREIGN KEY ("receiver_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "media" ADD CONSTRAINT "media_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "posts" ADD CONSTRAINT "posts_media_id_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "saved_posts" ADD CONSTRAINT "saved_posts_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "saved_posts" ADD CONSTRAINT "saved_posts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_college_id_colleges_id_fk" FOREIGN KEY ("college_id") REFERENCES "public"."colleges"("id") ON DELETE no action ON UPDATE no action;

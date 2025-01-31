@@ -1,5 +1,5 @@
 {
-  "id": "90012ac5-bc11-44d5-a4ab-52d5c96aed3c",
+  "id": "a904c7ed-064e-4ffd-88de-b91ad541ac76",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -560,58 +560,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.media": {
-      "name": "media",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "post_id": {
-          "name": "post_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "media_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "media_post_id_posts_id_fk": {
-          "name": "media_post_id_posts_id_fk",
-          "tableFrom": "media",
-          "tableTo": "posts",
-          "columnsFrom": [
-            "post_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.posts": {
       "name": "posts",
       "schema": "",
@@ -634,9 +582,17 @@
           "primaryKey": false,
           "notNull": false
         },
-        "media_id": {
-          "name": "media_id",
-          "type": "uuid",
+        "media_type": {
+          "name": "media_type",
+          "type": "media_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'image'"
+        },
+        "media": {
+          "name": "media",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -693,19 +649,6 @@
           "tableTo": "users",
           "columnsFrom": [
             "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "posts_media_id_media_id_fk": {
-          "name": "posts_media_id_media_id_fk",
-          "tableFrom": "posts",
-          "tableTo": "media",
-          "columnsFrom": [
-            "media_id"
           ],
           "columnsTo": [
             "id"
@@ -834,6 +777,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'Place your bio here'"
+        },
         "role": {
           "name": "role",
           "type": "varchar(12)",
@@ -856,7 +806,7 @@
         },
         "refresh_token": {
           "name": "refresh_token",
-          "type": "varchar(255)",
+          "type": "varchar(512)",
           "primaryKey": false,
           "notNull": false
         },
@@ -948,43 +898,7 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {
-    "public.status": {
-      "name": "status",
-      "schema": "public",
-      "values": [
-        "active",
-        "suspended",
-        "banned"
-      ]
-    },
-    "public.media_type": {
-      "name": "media_type",
-      "schema": "public",
-      "values": [
-        "image",
-        "gif"
-      ]
-    },
-    "public.visibility": {
-      "name": "visibility",
-      "schema": "public",
-      "values": [
-        "public",
-        "private"
-      ]
-    },
-    "public.gender": {
-      "name": "gender",
-      "schema": "public",
-      "values": [
-        "male",
-        "female",
-        "other",
-        "preferNotToSay"
-      ]
-    }
-  },
+  "enums": {},
   "schemas": {},
   "sequences": {},
   "roles": {},

@@ -10,13 +10,16 @@ import errorHandler from "./middleware/errorHandler.js";
 import userRoutes from "./routes/userRoute.js";
 import adminRoutes from "./routes/adminRoute.js"
 import collegeRoutes from "./routes/collgeRoute.js";
-
+import postRoutes from "./routes/postRoute.js";
 
 const app = express();
 
 const PORT = _config.PORT;
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -37,6 +40,7 @@ app.get("/health", (req, res) => {
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin" ,adminRoutes)
 app.use("/api/v1/college", collegeRoutes);
+app.use("/api/v1/post", postRoutes);
 
 app.use(errorHandler);
 app.listen(_config.PORT, () => {

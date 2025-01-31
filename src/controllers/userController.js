@@ -5,6 +5,7 @@ import { users } from "../models/User.js";
 import { eq, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../services/emaiService.js";
+import { posts } from "../models/Post.js";
 import jwt from "jsonwebtoken";
 import {
   generateAccessToken,
@@ -470,6 +471,95 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error in getting all users",
+    });
+  }
+};
+
+
+//get login user profile 
+
+export const getUserProfile = async (req, res) => {
+  try {
+    logger.info("Get user profile endpoint hit");
+    const userId = req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const [getUserProfile] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+
+      //get college location
+
+      const collegLocation = await db.select().from(colleges).where(eq(colleges.id, getUserProfile.collegeId));
+
+      //get post data
+
+      const postData = await db.select().from(posts).where(eq(posts.authorId, userId));
+
+     
+
+      const userProfile = {
+        ...getUserProfile,
+        collegeLocation: collegLocation[0].location,
+        collegeName: collegLocation[0].name,
+        postData: postData,
+        postsCount: postData.length,
+      };
+
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile fetched successfully",
+      data: userProfile,
+    });
+  } catch (error) {
+    logger.error(error, "Error in getting user profile");
+    return res.status(500).json({
+      success: false,
+      message: "Error in getting user profile",
+    });
+  }
+};
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    logger.info("Update profile bio endpoint hit");
+
+    const userId = req.params.id;
+    const { username, avatar, bio } = req.body;
+
+    if (!username && !avatar && !bio) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const [updatedProfile] = await db
+      .update(users)
+      .set({ username: username, avatar: avatar, bio: bio })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedProfile,
+    });
+  } catch (error) {
+    logger.error(error, "Error in updating profile bio");
+    return res.status(500).json({
+      success: false,
+      message: "Error in updating profile bio",
     });
   }
 };

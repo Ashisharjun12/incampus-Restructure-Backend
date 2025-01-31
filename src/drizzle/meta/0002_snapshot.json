@@ -1,6 +1,6 @@
 {
-  "id": "81cd1f6a-95f0-41ff-87c2-4ca89dcce197",
-  "prevId": "a904c7ed-064e-4ffd-88de-b91ad541ac76",
+  "id": "ed84b470-2df7-4c00-a4b5-26334f4e0389",
+  "prevId": "81cd1f6a-95f0-41ff-87c2-4ca89dcce197",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -617,20 +617,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": 0
-        },
-        "likes": {
-          "name": "likes",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "comments": {
-          "name": "comments",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
         },
         "is_edited": {
           "name": "is_edited",

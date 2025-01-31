@@ -9,13 +9,16 @@ import {
   LogoutUser,
   generateUsername,
   getUserById,
-  getAllUsers
+  getAllUsers,
+  getUserProfile,
+  updateProfile,
 } from "../controllers/userController.js";
 import { searchUser } from "../queries/userQuery.js";
 import { authenticateUser } from "../middleware/authenticate.js";
 
 const router = Router();
 
+//auth routes
 router.post("/register", RegisterUser);
 router.post("/login", LoginUser);
 router.post("/verify-email", verifyEmail);
@@ -27,6 +30,11 @@ router.get("/generate-username", generateUsername);
 
 //queries
 router.get("/search", authenticateUser, searchUser);
+router.get("/profile/:id", authenticateUser, getUserProfile);
+router.put("/update-profile/:id", authenticateUser, updateProfile);
+
+
+
 
 
 router.get("/all", getAllUsers);
