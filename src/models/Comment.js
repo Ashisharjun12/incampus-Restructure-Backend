@@ -3,6 +3,7 @@ import { users } from './User.js';
 import { pgTable, uuid, text, timestamp, index, integer, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { replies } from './Reply.js';
+import { commentLikes } from './commentLike.js';
 
 export const comments = pgTable(
   'comments',
@@ -23,6 +24,8 @@ export const comments = pgTable(
   }]
 );
 
+
+
 export const commentRelations = relations(comments, ({ one, many }) => ({
   post: one(posts, {
     fields: [comments.postId],
@@ -31,6 +34,11 @@ export const commentRelations = relations(comments, ({ one, many }) => ({
   author: one(users, {
     fields: [comments.authorId],
     references: [users.id],
+  }),
+  likes: many(commentLikes, { 
+    fields: [comments.id],
+    references: [commentLikes.commentId],
+  
   }),
   replies: many(replies, {
     fields: [comments.id],

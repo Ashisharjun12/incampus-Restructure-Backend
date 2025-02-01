@@ -65,7 +65,7 @@ export const userRelations = relations(users, ({ many, one }) => ({
   }),
   comments: many(comments, {
     fields: [users.id],
-    references: [comments.userId],
+    references: [comments.authorId],
     
   }),
   savedPosts: many(savedPosts, {
