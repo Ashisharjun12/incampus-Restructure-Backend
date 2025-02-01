@@ -512,6 +512,7 @@ export const getUserProfile = async (req, res) => {
         collegeName: collegLocation[0].name,
         postData: postData,
         postsCount: postData.length,
+        
       };
 
 

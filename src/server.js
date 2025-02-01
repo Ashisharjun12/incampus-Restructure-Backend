@@ -13,6 +13,7 @@ import collegeRoutes from "./routes/collgeRoute.js";
 import postRoutes from "./routes/postRoute.js";
 import followRoutes from "./routes/followRoute.js";
 import likeRoutes from "./routes/likeRoute.js";
+import commentRoutes from "./routes/commentRoute.js";
 const app = express();
 
 const PORT = _config.PORT;
@@ -44,6 +45,7 @@ app.use("/api/v1/college", collegeRoutes);
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/like", likeRoutes);
 app.use("/api/v1/follow", followRoutes);
+app.use("/api/v1/comment", commentRoutes);
 
 app.use(errorHandler);
 app.listen(_config.PORT, () => {
