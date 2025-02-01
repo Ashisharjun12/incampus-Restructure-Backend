@@ -7,6 +7,7 @@ import { colleges } from "../models/College.js";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { likes } from "../models/Like.js";
+import { savedPosts } from "../models/SavedPost.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -94,37 +95,49 @@ export const getPostById = async (req, res) => {
     logger.info("Getting post by id...");
 
     const postId = req.params.id;
+    const userId = req.user?.id; // Get current user id if authenticated
 
     if (!postId) {
       return res.status(400).json({ message: "Post id is required" });
     }
 
-    const [post] = await db
-      .select()
-      .from(posts)
-      .where(eq(posts.id, postId));
+    const [post] = await db.select().from(posts).where(eq(posts.id, postId));
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
+
+    // Get all likes for this post
+    const postLikes = await db
+      .select()
+      .from(likes)
+      .where(eq(likes.postId, postId));
 
     const [userData] = await db
       .select()
       .from(users)
       .where(eq(users.id, post.authorId));
 
-      const [collegeData] = await db.select().from(colleges).where(eq(colleges.id, userData.collegeId));
+    const [collegeData] = await db
+      .select()
+      .from(colleges)
+      .where(eq(colleges.id, userData.collegeId));
 
     const postData = {
       ...post,
+      likes: postLikes, // Include likes data
+      isLiked: userId
+        ? postLikes.some((like) => like.userId === userId)
+        : false,
       avatar: userData?.avatar,
       username: userData?.username,
       gender: userData?.gender,
       collegeName: collegeData?.name,
       collegeLocation: collegeData?.location,
       bio: userData?.bio,
-
-
+      verifiedBadge: userData?.verifiedBadge,
+      followerCount: userData?.followerCount,
+      followingCount: userData?.followingCount,
     };
 
     res
@@ -162,7 +175,6 @@ export const getPostByAuthorId = async (req, res) => {
   }
 };
 
-
 //delete post by id
 
 export const deletePostById = async (req, res) => {
@@ -176,14 +188,14 @@ export const deletePostById = async (req, res) => {
     }
 
     const deletePostById = await db.delete(posts).where(eq(posts.id, postId));
-    return res.status(200).json({ message: "Post deleted successfully", post: deletePostById });
-    
+    return res
+      .status(200)
+      .json({ message: "Post deleted successfully", post: deletePostById });
   } catch (error) {
     logger.error("Error deleting post by id...", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
-
+};
 
 //get post by user id
 
@@ -196,29 +208,29 @@ export const getPostByUserId = async (req, res) => {
       return res.status(400).json({ message: "User id is required" });
     }
 
-    const getPostByUserId = await db.select().from(posts).where(eq(posts.authorId, userId));
-    res.status(200).json({ message: "Post fetched successfully", post: getPostByUserId });
-    
+    const getPostByUserId = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.authorId, userId));
+    res
+      .status(200)
+      .json({ message: "Post fetched successfully", post: getPostByUserId });
   } catch (error) {
     logger.error("Error getting post by user id...", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 // update post by id
 
 export const updatePostById = async (req, res) => {
   try {
     logger.info("Updating post by id...");
-    
-    
   } catch (error) {
     logger.error("Error updating post by id...", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
-
-
+};
 
 //likes post
 
@@ -230,12 +242,14 @@ export const likePost = async (req, res) => {
     const userId = req.user.id;
 
     if (!postId || !userId) {
-      return res.status(400).json({ message: "Post id and user id are required" });
+      return res
+        .status(400)
+        .json({ message: "Post id and user id are required" });
     }
 
     // First verify the post exists
     const [post] = await db.select().from(posts).where(eq(posts.id, postId));
-    
+
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
@@ -246,7 +260,7 @@ export const likePost = async (req, res) => {
       .from(likes)
       .where(eq(likes.postId, postId))
       .where(eq(likes.userId, userId));
-    
+
     if (existingLike) {
       // Unlike the post
       await db
@@ -261,21 +275,19 @@ export const likePost = async (req, res) => {
         .set({ likesCount: updatedLikesCount })
         .where(eq(posts.id, postId));
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: "Post unliked successfully",
         isLiked: false,
-        likesCount: updatedLikesCount
+        likesCount: updatedLikesCount,
       });
     }
 
     // Like the post
-    await db
-      .insert(likes)
-      .values({
-        id: crypto.randomUUID(),
-        postId: postId,
-        userId: userId,
-      });
+    await db.insert(likes).values({
+      id: crypto.randomUUID(),
+      postId: postId,
+      userId: userId,
+    });
 
     const updatedLikesCount = post.likesCount + 1;
     // Update only likesCount since isLiked is removed
@@ -284,17 +296,40 @@ export const likePost = async (req, res) => {
       .set({ likesCount: updatedLikesCount })
       .where(eq(posts.id, postId));
 
-    const [userData] = await db.select().from(users).where(eq(users.id, userId));
+    const [userData] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Post liked successfully",
       isLiked: true,
       likesCount: updatedLikesCount,
-      user: userData
+      user: userData,
     });
-
   } catch (error) {
     logger.error("Error toggling post like...", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//saved post
+
+export const savePost = async (req, res) => {
+  try {
+    logger.info("Saving post...");
+
+    const postId = req.params.id;
+    const userId = req.user.id;
+
+    if (!postId || !userId) {
+      return res.status(400).json({ message: "Post id and user id are required" });
+    }
+
+
+
+  } catch (error) {
+    logger.error("Error saving post...", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

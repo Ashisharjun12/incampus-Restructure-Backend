@@ -8,6 +8,7 @@ import {
   getPostByUserId,
   updatePostById,
   likePost,
+  savePost,
 } from "../controllers/postController.js";
 import { authenticateUser } from "../middleware/authenticate.js";
 import { upload } from "../utils/multer.js";
@@ -27,5 +28,8 @@ router.put("/update/:id", authenticateUser, updatePostById);
 
 //like post
 router.post("/:id/like", authenticateUser, likePost);
+
+//save post
+router.post("/:id/save", authenticateUser, savePost);
 
 export default router;

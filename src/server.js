@@ -11,7 +11,7 @@ import userRoutes from "./routes/userRoute.js";
 import adminRoutes from "./routes/adminRoute.js"
 import collegeRoutes from "./routes/collgeRoute.js";
 import postRoutes from "./routes/postRoute.js";
-
+import followRoutes from "./routes/followRoute.js";
 const app = express();
 
 const PORT = _config.PORT;
@@ -41,6 +41,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin" ,adminRoutes)
 app.use("/api/v1/college", collegeRoutes);
 app.use("/api/v1/post", postRoutes);
+app.use("/api/v1/follow", followRoutes);
 
 app.use(errorHandler);
 app.listen(_config.PORT, () => {

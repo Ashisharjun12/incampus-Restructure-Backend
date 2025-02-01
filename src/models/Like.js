@@ -1,6 +1,6 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, index} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const likes = pgTable(
