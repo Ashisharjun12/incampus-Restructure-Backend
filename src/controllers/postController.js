@@ -232,86 +232,8 @@ export const updatePostById = async (req, res) => {
   }
 };
 
-//likes post
 
-export const likePost = async (req, res) => {
-  try {
-    logger.info("Toggling post like...");
 
-    const postId = req.params.id;
-    const userId = req.user.id;
-
-    if (!postId || !userId) {
-      return res
-        .status(400)
-        .json({ message: "Post id and user id are required" });
-    }
-
-    // First verify the post exists
-    const [post] = await db.select().from(posts).where(eq(posts.id, postId));
-
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-
-    // Check if user already liked the post
-    const [existingLike] = await db
-      .select()
-      .from(likes)
-      .where(eq(likes.postId, postId))
-      .where(eq(likes.userId, userId));
-
-    if (existingLike) {
-      // Unlike the post
-      await db
-        .delete(likes)
-        .where(eq(likes.postId, postId))
-        .where(eq(likes.userId, userId));
-
-      const updatedLikesCount = Math.max(0, post.likesCount - 1);
-      // Update only likesCount since isLiked is removed
-      await db
-        .update(posts)
-        .set({ likesCount: updatedLikesCount })
-        .where(eq(posts.id, postId));
-
-      return res.status(200).json({
-        message: "Post unliked successfully",
-        isLiked: false,
-        likesCount: updatedLikesCount,
-      });
-    }
-
-    // Like the post
-    await db.insert(likes).values({
-      id: crypto.randomUUID(),
-      postId: postId,
-      userId: userId,
-    });
-
-    const updatedLikesCount = post.likesCount + 1;
-    // Update only likesCount since isLiked is removed
-    await db
-      .update(posts)
-      .set({ likesCount: updatedLikesCount })
-      .where(eq(posts.id, postId));
-
-    const [userData] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId));
-
-    res.status(200).json({
-      message: "Post liked successfully",
-      isLiked: true,
-      likesCount: updatedLikesCount,
-      user: userData,
-    });
-  } catch (error) {
-    logger.error("Error toggling post like...", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
 
 //saved post
 

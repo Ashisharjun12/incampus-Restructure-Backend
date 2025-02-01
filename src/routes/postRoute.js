@@ -7,7 +7,6 @@ import {
   deletePostById,
   getPostByUserId,
   updatePostById,
-  likePost,
   savePost,
 } from "../controllers/postController.js";
 import { authenticateUser } from "../middleware/authenticate.js";
@@ -26,8 +25,7 @@ router.delete("/delete/:id", deletePostById);
 router.get("/get-post-by-author/:id", authenticateUser, getPostByUserId);
 router.put("/update/:id", authenticateUser, updatePostById);
 
-//like post
-router.post("/:id/like", authenticateUser, likePost);
+
 
 //save post
 router.post("/:id/save", authenticateUser, savePost);
