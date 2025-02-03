@@ -14,6 +14,7 @@ import postRoutes from "./routes/postRoute.js";
 import followRoutes from "./routes/followRoute.js";
 import likeRoutes from "./routes/likeRoute.js";
 import commentRoutes from "./routes/commentRoute.js";
+import replyRoutes from "./routes/replyRoute.js";
 const app = express();
 
 const PORT = _config.PORT;
@@ -46,6 +47,7 @@ app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/like", likeRoutes);
 app.use("/api/v1/follow", followRoutes);
 app.use("/api/v1/comment", commentRoutes);
+app.use("/api/v1/reply", replyRoutes);
 
 app.use(errorHandler);
 app.listen(_config.PORT, () => {

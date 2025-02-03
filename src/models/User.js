@@ -7,6 +7,7 @@ import { comments } from './Comment.js';
 import { savedPosts } from './SavedPost.js';
 import { directMessages } from './PersonalDms.js';
 import { follows } from './Follow.js';
+import { replies } from './Reply.js';
 
 const GenderEnum = pgEnum('gender', ['male', 'female', 'other', 'preferNotToSay']);
 const StatusEnum = pgEnum('status', ['active', 'suspended', 'banned']);
@@ -78,14 +79,18 @@ export const userRelations = relations(users, ({ many, one }) => ({
     references: [directMessages.userId],
     
   }),
+  replies: many(replies, {
+    fields: [users.id],
+    references: [replies.authorId],
+  }),
   followers: many(follows, {
-    fields: [users.id], // Local field in users table
-    references: [follows.followeeId], // Foreign key in follows table
-    relationName: 'follower', // Relation name for followers
+    fields: [users.id], 
+    references: [follows.followeeId], 
+    relationName: 'follower', 
   }),
   following: many(follows, {
-    fields: [users.id], // Local field in users table
-    references: [follows.followerId], // Foreign key in follows table
-    relationName: 'followee', // Relation name for following
+    fields: [users.id], 
+    references: [follows.followerId], 
+    relationName: 'followee', 
   }),
 }));
