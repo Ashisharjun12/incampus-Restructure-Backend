@@ -9,8 +9,8 @@ export const confessions = pgTable(
   'confessions',
   {
     id: uuid('id').primaryKey(),
-    userId: uuid('user_id').references(() => users.id), // Foreign key to users (optional for anonymity)
-    collegeId: uuid('college_id').references(() => colleges.id), // Foreign key to colleges
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users (optional for anonymity)
+    collegeId: uuid('college_id').references(() => colleges.id, { onDelete: 'cascade' }), // Foreign key to colleges
     content: text('content').notNull(),
     isEdited: boolean('is_edited').default(false),
     confessionLikesCount: integer('confession_likes_count').default(0),

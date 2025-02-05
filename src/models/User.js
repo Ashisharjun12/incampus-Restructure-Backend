@@ -5,7 +5,6 @@ import { posts } from './Post.js';
 import { likes } from './Like.js';
 import { comments } from './Comment.js';
 import { savedPosts } from './SavedPost.js';
-import { directMessages } from './PersonalDms.js';
 import { follows } from './Follow.js';
 import { replies } from './Reply.js';
 
@@ -25,7 +24,7 @@ export const users = pgTable(
     age: integer('age'),
     bio: text('bio').default('Place your bio here'),
     role: varchar('role', { length: 12 }).notNull().default('user'),
-    collegeId: uuid('college_id').references(() => colleges.id),
+    collegeId: uuid('college_id').references(() => colleges.id , {onDelete:'cascade'}),
     isVerified: boolean('is_verified').default(false),
     refreshToken: varchar('refresh_token', { length: 512 }),
     refreshTokenExpiry: timestamp('refresh_token_expiry'),
@@ -46,6 +45,7 @@ export const users = pgTable(
       createdAtIdx: index('created_at_idx').on(table.createdAt),
     }
   ]
+
 );
 
 export const userRelations = relations(users, ({ many, one }) => ({
@@ -72,11 +72,6 @@ export const userRelations = relations(users, ({ many, one }) => ({
   savedPosts: many(savedPosts, {
     fields: [users.id],
     references: [savedPosts.userId],
-    
-  }),
-  directMessages: many(directMessages, {
-    fields: [users.id],
-    references: [directMessages.userId],
     
   }),
   replies: many(replies, {

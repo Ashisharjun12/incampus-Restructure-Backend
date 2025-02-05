@@ -7,10 +7,11 @@ export const likes = pgTable(
   'likes',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
-    userId: uuid('user_id').references(() => users.id), // Foreign key to users
+    postId: uuid('post_id').references(() => posts.id, { onDelete: 'cascade' }),   // Foreign key to posts
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users
     createdAt: timestamp('created_at').defaultNow(),
   },
+
   (table) => [{
     postIdIdx: index('post_id_idx').on(table.postId),
     userIdIdx: index('user_id_idx').on(table.userId),

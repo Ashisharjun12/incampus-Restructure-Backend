@@ -8,10 +8,11 @@ export const follows = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     followerId: uuid('follower_id')
-      .references(() => users.id)
+      .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
     followeeId: uuid('followee_id')
-      .references(() => users.id)
+      .references(() => users.id, { onDelete: 'cascade' })
+
       .notNull(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),

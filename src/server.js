@@ -15,7 +15,9 @@ import followRoutes from "./routes/followRoute.js";
 import likeRoutes from "./routes/likeRoute.js";
 import commentRoutes from "./routes/commentRoute.js";
 import replyRoutes from "./routes/replyRoute.js";
+
 const app = express();
+
 
 const PORT = _config.PORT;
 
@@ -40,6 +42,7 @@ app.get("/health", (req, res) => {
 
 
 // //routes
+
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin" ,adminRoutes)
 app.use("/api/v1/college", collegeRoutes);

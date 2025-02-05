@@ -7,10 +7,11 @@ export const savedPosts = pgTable(
   'saved_posts',
   {
     id: uuid('id').primaryKey(),
-    postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
-    userId: uuid('user_id').references(() => users.id), // Foreign key to users
+    postId: uuid('post_id').references(() => posts.id, { onDelete: 'cascade' }), // Foreign key to posts
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users
     createdAt: timestamp('created_at').defaultNow(),
   },
+
   (table) => [
     {
       postIdIdx: index('saved_post_post_id_idx').on(table.postId),

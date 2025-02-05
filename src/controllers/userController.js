@@ -85,7 +85,7 @@ export const RegisterUser = async (req, res) => {
         DISPOSABLE: "Disposable email addresses are not allowed",
         INVALID: "Invalid email format",
         NO_MX_RECORDS: "Invalid email domain",
-        DEFAULT: "Please enter a valid email address"
+        DEFAULT: "Please Enter a valid email address"
       };
 
       return res.status(403).json({

@@ -7,9 +7,10 @@ export const replyLikes = pgTable(
   "reply_likes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    replyId: uuid("reply_id").references(() => replies.id),
-    userId: uuid("user_id").references(() => users.id),
+    replyId: uuid("reply_id").references(() => replies.id, { onDelete: 'cascade' }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: 'cascade' }),
     createdAt: timestamp("created_at").defaultNow(),
+
   },
   (table) => [
     {

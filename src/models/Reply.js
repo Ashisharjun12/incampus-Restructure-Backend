@@ -8,12 +8,13 @@ export const replies = pgTable(
   'replies',
   {
     id: uuid('id').primaryKey(),
-    commentId: uuid('comment_id').references(() => comments.id),
-    authorId: uuid('author_id').references(() => users.id),
+    commentId: uuid('comment_id').references(() => comments.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }),
     content: text('content').notNull(),
     isEdited: boolean('is_edited').default(false),
     replyLikesCount: integer('reply_likes_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),
+
     updatedAt: timestamp('updated_at').defaultNow(),
   },
   (table) => [{

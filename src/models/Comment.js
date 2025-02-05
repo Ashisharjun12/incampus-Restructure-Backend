@@ -9,8 +9,8 @@ export const comments = pgTable(
   'comments',
   {
     id: uuid('id').primaryKey().unique(),
-    postId: uuid('post_id').references(() => posts.id), // Foreign key to posts
-    authorId: uuid('author_id').references(() => users.id), // Foreign key to users
+    postId: uuid('post_id').references(() => posts.id, { onDelete: 'cascade' }), // Foreign key to posts
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users
     content: text('content').notNull(),
     isEdited: boolean('is_edited').default(false),
     commentLikesCount: integer('comment_likes_count').default(0),

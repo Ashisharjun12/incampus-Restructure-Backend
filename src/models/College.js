@@ -8,7 +8,7 @@ export const colleges = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 50 }).unique().notNull(),
     location: varchar('location', { length: 50 }).notNull(),
-    createdById: uuid('created_by_id').references(() => admins.id), // Foreign key to admins
+    createdById: uuid('created_by_id').references(() => admins.id, { onDelete: 'cascade' }), // Foreign key to admins
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),

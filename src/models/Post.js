@@ -13,7 +13,7 @@ export const posts = pgTable(
   'posts',
   {
     id: uuid('id').primaryKey(),
-    authorId: uuid('author_id').references(() => users.id), // Foreign key to users
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users
     content: text('content'),
     mediaType: MediaTypeEnum('media_type').default('image'),
     media: jsonb('media'), 

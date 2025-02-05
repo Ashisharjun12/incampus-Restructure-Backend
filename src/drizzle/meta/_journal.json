@@ -15,6 +15,27 @@
       "when": 1738441810647,
       "tag": "0001_faithful_pandemic",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738771405577,
+      "tag": "0002_salty_firebrand",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738771725649,
+      "tag": "0003_striped_jean_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1738772395372,
+      "tag": "0004_open_groot",
+      "breakpoints": true
     }
   ]
 }
