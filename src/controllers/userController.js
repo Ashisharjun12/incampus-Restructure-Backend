@@ -17,6 +17,7 @@ import {
   colors,
   animals,
 } from "unique-names-generator";
+import { aj } from "../security/email.js";
 
 const generateAccessRefreshToken = async (userPayload) => {
   logger.info("Generating access and refresh token user...");
@@ -71,6 +72,26 @@ export const RegisterUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
+      });
+    }
+
+    // Arcjet email validation
+    const decision = await aj.protect(req, {
+      email: email,
+    });
+    
+    if (decision.isDenied()) {
+      const reasonMessages = {
+        DISPOSABLE: "Disposable email addresses are not allowed",
+        INVALID: "Invalid email format",
+        NO_MX_RECORDS: "Invalid email domain",
+        DEFAULT: "Please enter a valid email address"
+      };
+
+      return res.status(403).json({
+        success: false,
+        message: reasonMessages[decision.reason] || reasonMessages.DEFAULT,
+        reason: decision.reason
       });
     }
 

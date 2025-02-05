@@ -141,7 +141,6 @@ export const loginAdmin = async (req, res) => {
     //set cookie
     res.cookie("access_token", accessToken);
     res.cookie("refresh_token", refreshToken);
-
     //set is active true is in db
     await db
       .update(admins)
