@@ -3,6 +3,7 @@ import { users } from "../models/User.js";
 import { follows } from "../models/Follow.js";
 import { db } from "../config/database.js";
 import { and, eq, sql } from "drizzle-orm";
+import { colleges } from "../models/College.js";
 
 export const followUser = async (req, res) => {
   try {
@@ -138,6 +139,64 @@ export const getFollowStatus = async (req, res) => {
     }
   } catch (error) {
     logger.error("Error getting follow status...", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//list of following users
+
+export const getFollowingUsers = async (req, res) => {
+  try {
+    logger.info("Getting following users...");
+    const userId = req.params.id;
+
+    const listofusers = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        bio: users.bio
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followeeId, users.id))
+      .where(eq(follows.followerId, userId));
+
+    return res.json({
+      success: true,
+      message: "Following users",
+      following: listofusers,
+    });
+  } catch (error) {
+    logger.error("Error getting following users...", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//list of followers
+
+export const getFollowerUsers = async (req, res) => {
+  try {
+    logger.info("Getting followers...");
+    const userId = req.params.id;
+
+    const listoffollowers = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        bio: users.bio
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followerId, users.id))
+      .where(eq(follows.followeeId, userId));
+
+    return res.json({
+      success: true,
+      message: "Followers",
+      followers: listoffollowers,
+    });
+  } catch (error) {
+    logger.error("Error getting followers...", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -2,9 +2,11 @@ import express from "express";
 import { _config } from "./config/config.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import {authenticateUser} from "./middleware/authenticate.js"
 import helmet from "helmet";
 import logger from "./utils/logger.js";
 import morgan from "morgan";
+import expressProxy from "express-http-proxy";
 import accessLogStream from "./utils/morgan.js";
 import errorHandler from "./middleware/errorHandler.js";
 import userRoutes from "./routes/userRoute.js";
@@ -22,8 +24,7 @@ const app = express();
 const PORT = _config.PORT;
 
 app.use(cors({
-  origin: "*",
-  
+origin: "http://localhost:3001",
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -41,7 +42,10 @@ app.get("/health", (req, res) => {
 });
 
 
-// //routes
+//proxy
+app.use("/api/v1/message", authenticateUser,expressProxy("http://localhost:3002"))
+
+//routes
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin" ,adminRoutes)
