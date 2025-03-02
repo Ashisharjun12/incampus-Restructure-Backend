@@ -17,6 +17,7 @@ import followRoutes from "./routes/followRoute.js";
 import likeRoutes from "./routes/likeRoute.js";
 import commentRoutes from "./routes/commentRoute.js";
 import replyRoutes from "./routes/replyRoute.js";
+import confessionRoutes from "./routes/confessionRoute.js"
 
 const app = express();
 
@@ -24,7 +25,7 @@ const app = express();
 const PORT = _config.PORT;
 
 app.use(cors({
-origin: "http://localhost:3001",
+origin: "*",
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -55,9 +56,11 @@ app.use("/api/v1/like", likeRoutes);
 app.use("/api/v1/follow", followRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/reply", replyRoutes);
+app.use("api/v1/confession", confessionRoutes);
+
 
 app.use(errorHandler);
-app.listen(_config.PORT, () => {
+app.listen(_config.PORT,() => {
   logger.info(`User service is running on port ${PORT}`);
   logger.info(`Database is running on port ${_config.DATABASE_URI}`);
 

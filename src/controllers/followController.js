@@ -155,7 +155,8 @@ export const getFollowingUsers = async (req, res) => {
         id: users.id,
         username: users.username,
         avatar: users.avatar,
-        bio: users.bio
+        bio: users.bio,
+        verificationBadge:users.verifiedBadge
       })
       .from(follows)
       .innerJoin(users, eq(follows.followeeId, users.id))
@@ -184,7 +185,8 @@ export const getFollowerUsers = async (req, res) => {
         id: users.id,
         username: users.username,
         avatar: users.avatar,
-        bio: users.bio
+        bio: users.bio,
+        verificationBadge:users.verifiedBadge
       })
       .from(follows)
       .innerJoin(users, eq(follows.followerId, users.id))

@@ -1,5 +1,5 @@
 {
-  "id": "c1e47cf3-ad16-4621-a7a6-fbb69080e3de",
+  "id": "bebe9377-7edf-45af-8e71-887fb47d939b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -107,6 +107,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "logo": {
+          "name": "logo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "location": {
           "name": "location",
           "type": "varchar(50)",
@@ -153,7 +159,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -247,7 +253,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "comments_author_id_users_id_fk": {
@@ -260,7 +266,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -278,6 +284,261 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.comment_likes": {
+      "name": "comment_likes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "comment_id": {
+          "name": "comment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "comment_likes_comment_id_comments_id_fk": {
+          "name": "comment_likes_comment_id_comments_id_fk",
+          "tableFrom": "comment_likes",
+          "tableTo": "comments",
+          "columnsFrom": [
+            "comment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "comment_likes_user_id_users_id_fk": {
+          "name": "comment_likes_user_id_users_id_fk",
+          "tableFrom": "comment_likes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.confessions_comments": {
+      "name": "confessions_comments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "confession_id": {
+          "name": "confession_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "confessions_comments_confession_id_confessions_id_fk": {
+          "name": "confessions_comments_confession_id_confessions_id_fk",
+          "tableFrom": "confessions_comments",
+          "tableTo": "confessions",
+          "columnsFrom": [
+            "confession_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "confessions_comments_user_id_users_id_fk": {
+          "name": "confessions_comments_user_id_users_id_fk",
+          "tableFrom": "confessions_comments",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.confessions_likes": {
+      "name": "confessions_likes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "confession_id": {
+          "name": "confession_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "confessions_likes_confession_id_confessions_id_fk": {
+          "name": "confessions_likes_confession_id_confessions_id_fk",
+          "tableFrom": "confessions_likes",
+          "tableTo": "confessions",
+          "columnsFrom": [
+            "confession_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "confessions_likes_user_id_users_id_fk": {
+          "name": "confessions_likes_user_id_users_id_fk",
+          "tableFrom": "confessions_likes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.confession_room": {
+      "name": "confession_room",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "college_id": {
+          "name": "college_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "members_count": {
+          "name": "members_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "confession_messages": {
+          "name": "confession_messages",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "confession_room_college_id_colleges_id_fk": {
+          "name": "confession_room_college_id_colleges_id_fk",
+          "tableFrom": "confession_room",
+          "tableTo": "colleges",
+          "columnsFrom": [
+            "college_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.confessions": {
       "name": "confessions",
       "schema": "",
@@ -290,12 +551,6 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "college_id": {
-          "name": "college_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -327,14 +582,6 @@
           "notNull": false,
           "default": 0
         },
-        "status": {
-          "name": "status",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'active'"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -362,20 +609,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "confessions_college_id_colleges_id_fk": {
-          "name": "confessions_college_id_colleges_id_fk",
-          "tableFrom": "confessions",
-          "tableTo": "colleges",
-          "columnsFrom": [
-            "college_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -435,7 +669,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "follows_followee_id_users_id_fk": {
@@ -448,7 +682,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -501,7 +735,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "likes_user_id_users_id_fk": {
@@ -514,93 +748,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.direct_messages": {
-      "name": "direct_messages",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "sender_id": {
-          "name": "sender_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "receiver_id": {
-          "name": "receiver_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_read": {
-          "name": "is_read",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "status": {
-          "name": "status",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'active'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "direct_messages_sender_id_users_id_fk": {
-          "name": "direct_messages_sender_id_users_id_fk",
-          "tableFrom": "direct_messages",
-          "tableTo": "users",
-          "columnsFrom": [
-            "sender_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "direct_messages_receiver_id_users_id_fk": {
-          "name": "direct_messages_receiver_id_users_id_fk",
-          "tableFrom": "direct_messages",
-          "tableTo": "users",
-          "columnsFrom": [
-            "receiver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -717,7 +865,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -796,7 +944,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "replies_author_id_users_id_fk": {
@@ -809,7 +957,73 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reply_likes": {
+      "name": "reply_likes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "reply_id": {
+          "name": "reply_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "reply_likes_reply_id_replies_id_fk": {
+          "name": "reply_likes_reply_id_replies_id_fk",
+          "tableFrom": "reply_likes",
+          "tableTo": "replies",
+          "columnsFrom": [
+            "reply_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "reply_likes_user_id_users_id_fk": {
+          "name": "reply_likes_user_id_users_id_fk",
+          "tableFrom": "reply_likes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -861,7 +1075,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "saved_posts_user_id_users_id_fk": {
@@ -874,7 +1088,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1049,7 +1263,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
