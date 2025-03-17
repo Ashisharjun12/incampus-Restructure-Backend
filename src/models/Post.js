@@ -46,5 +46,5 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   }),
   comments: many(comments, {
     relationName: 'post_comments',
-  }),
+    }),
 }));

@@ -8,20 +8,31 @@ import { colleges } from "../models/College.js";
 import { eq, and, sql } from "drizzle-orm";
 import crypto from "crypto";
 
+
+
 //add comment
 export const addComment = async (req, res) => {
   try {
     logger.info("Adding comment");
     const postId = req.params.postId;
     const authorId = req.user.id;
-    const { content } = req.body;
+    const { content , gifurl , gifId} = req.body;
 
-    if (!postId || !authorId || !content) {
+    if (!postId || !authorId ) {
       return res.status(400).json({
-        message: "Invalid request , missing postId, authorId or content",
+        message: "Invalid request , missing postId, authorId.",
       });
     }
 
+    //adding gifs to commnet
+    const gifurls=[]
+    gifurls.push({
+      url:gifurl,
+      Id:gifId
+    })
+
+    
+//cretate comment..
     const [newComment] = await db
       .insert(comments)
       .values({
@@ -29,6 +40,7 @@ export const addComment = async (req, res) => {
         postId,
         authorId,
         content,
+        gifUrl: gifurls
       })
       .returning();
 
@@ -234,6 +246,7 @@ export const getAllCommentsForPost = async (req, res) => {
           authorCollege: {
             id: collegeData.id,
             name: collegeData.name,
+            collgeLogo:collegeData.logo,
             location: collegeData.location,
           },
         };

@@ -9,7 +9,7 @@ export const createCollege = async (req, res) => {
   try {
     logger.info("College creation route hit...");
 
-    const { name, location  } = req.body;
+    const { name, location } = req.body;
 
     //get admin id from admin middleware
     const adminId = req.admin.id;
@@ -30,7 +30,7 @@ export const createCollege = async (req, res) => {
         if (uploadResponse) {
           logoUrl = {
             url: uploadResponse.secure_url,
-            public_id: uploadResponse.public_id
+            public_id: uploadResponse.public_id,
           };
         }
       } catch (error) {
@@ -150,11 +150,12 @@ export const getCollege = async (req, res) => {
     logger.info("Get college route hit...");
 
     const findAllCollges = await db.select().from(colleges);
+    
 
     return res.json({
       success: true,
       message: "College fetched successfully",
-      data: findAllCollges,
+      data:findAllCollges,
     });
   } catch (error) {
     logger.error(error, "Error in getting college");

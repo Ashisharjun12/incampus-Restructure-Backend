@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { comments } from './Comment.js';
 import { users } from './User.js';
-import { pgTable, uuid, text, timestamp, index, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, index, integer, boolean, jsonb } from 'drizzle-orm/pg-core';
 import { replyLikes } from './replyLike.js';
 
 export const replies = pgTable(
@@ -10,7 +10,8 @@ export const replies = pgTable(
     id: uuid('id').primaryKey(),
     commentId: uuid('comment_id').references(() => comments.id, { onDelete: 'cascade' }),
     authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }),
-    content: text('content').notNull(),
+    content: text('content'),
+    gifurl:jsonb('gifurl'),
     isEdited: boolean('is_edited').default(false),
     replyLikesCount: integer('reply_likes_count').default(0),
     createdAt: timestamp('created_at').defaultNow(),

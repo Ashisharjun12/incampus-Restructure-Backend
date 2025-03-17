@@ -12,12 +12,21 @@ export const addReply = async (req, res) => {
     logger.info("Adding reply to commnet..");
 
     const commentId = req.params.commentId;
-    const { content } = req.body;
+    const { content ,gifurl,gifId} = req.body;
     const authorId = req.user.id;
 
-    if (!commentId || !content || !authorId) {
+    if (!commentId || !authorId) {
       return res.status(400).json({ message: "Invalid request" });
     }
+
+//add gifs to db
+const gifUrls =[]
+gifUrls.push({
+  url:gifurl,
+  id:gifId
+})
+
+
 
     //check if comment exists
     const [findComment] = await db
@@ -45,6 +54,7 @@ export const addReply = async (req, res) => {
         commentId,
         authorId,
         content,
+        gifurl : gifUrls
       })
       .returning();
 

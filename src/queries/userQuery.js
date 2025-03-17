@@ -9,7 +9,7 @@ export const searchUser = async (req, res) => {
   try {
     const query = req.query.q?.toString().trim() || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Show 10 results per page
+    const limit = 10; 
     const offset = (page - 1) * limit;
 
     logger.info(`Searching for user with query: ${query}, page: ${page}`);
@@ -26,6 +26,7 @@ export const searchUser = async (req, res) => {
           username: users.username,
           avatar: users.avatar,
           college: colleges.name,
+          collgelogo:colleges.logo,
           verifiedBadge: users.verifiedBadge,
           collegeLocation: colleges.location,
         })
@@ -102,6 +103,7 @@ export const mutualCollegeFriends = async (req, res) => {
           avatar: users.avatar,
           verifiedBadge: users.verifiedBadge,
           collegeName: colleges.name,
+          collegeLogo:colleges.logo,
           bio: users.bio,
           collegeLocation: colleges.location,
           followerCount: users.followerCount,

@@ -1,12 +1,12 @@
 import {Router} from "express"
-import { createConfession } from "../controllers/confessionController.js"
+import { createConfession, getAllConfessionRooms } from "../controllers/confessionController.js"
 import { authenticateUser } from "../middleware/authenticate.js"
 
 
 const router = Router()
 
 //create routes
-
+router.get('/rooms',getAllConfessionRooms)
 router.post('/create',  authenticateUser,createConfession)
 
 

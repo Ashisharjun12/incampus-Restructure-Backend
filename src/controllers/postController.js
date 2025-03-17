@@ -1,5 +1,4 @@
 import logger from "../utils/logger.js";
-import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 import { db } from "../config/database.js";
 import { posts } from "../models/Post.js";
 import { users } from "../models/User.js";
@@ -8,10 +7,11 @@ import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { likes } from "../models/Like.js";
 import { savedPosts } from "../models/SavedPost.js";
+import { deleteObject } from "../utils/s3.js";
 
 export const createPost = async (req, res) => {
   try {
-    logger.info("Creating post endpoint...");
+    logger.info("Creating post endpoint with S3...");
 
     const { content, mediaType, visibility } = req.body;
     const files = req.files;
@@ -30,24 +30,33 @@ export const createPost = async (req, res) => {
 
     let mediaurls = [];
 
-    //handle media on cloudinary
+    // Handle S3 file uploads
     if (files && files.length > 0) {
+      logger.info(`Processing ${files.length} files uploaded to S3`);
+      
       for (const file of files) {
-        try {
-          const uploadResponse = await uploadOnCloudinary(file.path);
-          if (uploadResponse) {
-            mediaurls.push({
-              type: mediaType || "image",
-              url: uploadResponse.url,
-              id: uploadResponse.public_id,
-            });
-          }
-        } catch (error) {
-          logger.error("Error uploading media on cloudinary...", error);
-          return res.status(500).json({ message: "Error uploading media" });
+        if (!file.location || !file.key) {
+          logger.error("Invalid S3 file object:", file);
+          return res.status(500).json({ message: "Error with file upload to S3" });
         }
+        
+        // Determine media type based on mimetype if not explicitly specified
+        const fileType = mediaType || 
+          (file.mimetype.startsWith('video/') ? 'video' : 
+           file.mimetype.startsWith('audio/') ? 'audio' : 'image');
+        
+        mediaurls.push({
+          type: fileType,
+          url: file.location, // S3 URL from multer-s3
+          key: file.key, // S3 key for future deletion
+          mimetype: file.mimetype // Store mimetype for reference
+        });
+        
+        logger.info(`Added file to post: ${file.key} (${fileType})`);
       }
     }
+
+    console.log("Media URLs:", mediaurls);
 
     //create post in db
     const [newPost] = await db
@@ -57,10 +66,12 @@ export const createPost = async (req, res) => {
         authorId: userId,
         content: content,
         media: mediaurls,
-        mediaType: mediaType,
+        mediaType: mediaType || (mediaurls.length > 0 ? mediaurls[0].type : null),
         visibility: visibility,
       })
       .returning();
+
+    console.log("New post created:", newPost);
 
     return res
       .status(201)
@@ -187,7 +198,31 @@ export const deletePostById = async (req, res) => {
       return res.status(400).json({ message: "Post id is required" });
     }
 
+    // First get the post to check for media to delete
+    const [post] = await db.select().from(posts).where(eq(posts.id, postId));
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Delete associated media files from S3
+    if (post.media && post.media.length > 0) {
+      for (const media of post.media) {
+        if (media.key) {
+          try {
+            logger.info(`Deleting S3 object: ${media.key}`);
+            await deleteObject(media.key);
+          } catch (error) {
+            logger.error(`Error deleting S3 object ${media.key}:`, error);
+            // Continue with deletion even if media deletion fails
+          }
+        }
+      }
+    }
+
+    // Delete the post from database
     const deletePostById = await db.delete(posts).where(eq(posts.id, postId));
+    
     return res
       .status(200)
       .json({ message: "Post deleted successfully", post: deletePostById });
@@ -226,14 +261,13 @@ export const getPostByUserId = async (req, res) => {
 export const updatePostById = async (req, res) => {
   try {
     logger.info("Updating post by id...");
+    // Implementation needed
+    res.status(501).json({ message: "Feature not implemented yet" });
   } catch (error) {
     logger.error("Error updating post by id...", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
-
 
 //saved post
 
@@ -248,8 +282,8 @@ export const savePost = async (req, res) => {
       return res.status(400).json({ message: "Post id and user id are required" });
     }
 
-
-
+    // Implementation needed
+    res.status(501).json({ message: "Feature not implemented yet" });
   } catch (error) {
     logger.error("Error saving post...", error);
     res.status(500).json({ message: "Internal server error" });

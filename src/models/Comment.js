@@ -1,6 +1,6 @@
 import { posts } from './Post.js';
 import { users } from './User.js';
-import { pgTable, uuid, text, timestamp, index, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, index, integer, boolean,jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { replies } from './Reply.js';
 import { commentLikes } from './commentLike.js';
@@ -9,9 +9,10 @@ export const comments = pgTable(
   'comments',
   {
     id: uuid('id').primaryKey().unique(),
-    postId: uuid('post_id').references(() => posts.id, { onDelete: 'cascade' }), // Foreign key to posts
-    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }), // Foreign key to users
-    content: text('content').notNull(),
+    postId: uuid('post_id').references(() => posts.id, { onDelete: 'cascade' }), 
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }), 
+    content: text('content'),
+    gifUrl:jsonb('gif_url'),
     isEdited: boolean('is_edited').default(false),
     commentLikesCount: integer('comment_likes_count').default(0),
     commentRepliesCount: integer('comment_replies_count').default(0),
@@ -23,6 +24,7 @@ export const comments = pgTable(
     authorIdIdx: index('author_id_idx').on(table.authorId),
   }]
 );
+
 
 
 
