@@ -4,10 +4,11 @@ import { posts } from "../models/Post.js";
 import { users } from "../models/User.js";
 import { colleges } from "../models/College.js";
 import crypto from "crypto";
-import { eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { likes } from "../models/Like.js";
 import { savedPosts } from "../models/SavedPost.js";
 import { deleteObject } from "../utils/s3.js";
+import { extractHashtags, getOrCreateHashtags, createPostHashtagAssociations } from "../controllers/hashtagController.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -47,9 +48,9 @@ export const createPost = async (req, res) => {
         
         mediaurls.push({
           type: fileType,
-          url: file.location, // S3 URL from multer-s3
-          key: file.key, // S3 key for future deletion
-          mimetype: file.mimetype // Store mimetype for reference
+          url: file.location, 
+          key: file.key, 
+          mimetype: file.mimetype 
         });
         
         logger.info(`Added file to post: ${file.key} (${fileType})`);
@@ -58,11 +59,14 @@ export const createPost = async (req, res) => {
 
     console.log("Media URLs:", mediaurls);
 
-    //create post in db
+    // Generate a post ID
+    const postId = crypto.randomUUID();
+    
+    // Create post in db
     const [newPost] = await db
       .insert(posts)
       .values({
-        id: crypto.randomUUID(),
+        id: postId,
         authorId: userId,
         content: content,
         media: mediaurls,
@@ -72,6 +76,32 @@ export const createPost = async (req, res) => {
       .returning();
 
     console.log("New post created:", newPost);
+    
+    // Process hashtags if there's content
+    if (content) {
+      try {
+        // Extract hashtags from content
+        const extractedTags = extractHashtags(content);
+        
+        if (extractedTags.length > 0) {
+          logger.info(`Found ${extractedTags.length} hashtags in post: ${extractedTags.join(', ')}`);
+          
+          // Get or create hashtag records
+          const hashtagRecords = await getOrCreateHashtags(extractedTags);
+          
+          // Link hashtags to post
+          await createPostHashtagAssociations(
+            postId, 
+            hashtagRecords.map(tag => tag.id)
+          );
+          
+          logger.info(`Associated ${hashtagRecords.length} hashtags with post ${postId}`);
+        }
+      } catch (hashtagError) {
+        // Log the error but don't fail the post creation
+        logger.error("Error processing hashtags for post:", hashtagError);
+      }
+    }
 
     return res
       .status(201)
@@ -84,14 +114,45 @@ export const createPost = async (req, res) => {
 
 //get all post
 
+
 export const getAllPosts = async (req, res) => {
   try {
     logger.info("Getting all posts...");
-    const getAllPosts = await db.select().from(posts);
+    
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const validatedPage = page > 0 ? page : 1;
+    const validatedLimit = limit > 0 ? limit : 12;
+    const offset = (validatedPage - 1) * validatedLimit;
+
+    // Get total count of all posts
+    const totalResult = await db
+      .select({ count: sql`count(*)` })
+      .from(posts);
+
+    const totalPosts = Number(totalResult[0].count);
+    const totalPages = Math.ceil(totalPosts / validatedLimit);
+
+    // Get paginated posts
+    const allPosts = await db
+      .select()
+      .from(posts)
+      .orderBy(desc(posts.createdAt)) // Ensure consistent ordering
+      .limit(validatedLimit)
+      .offset(offset);
+
     res.status(200).json({
       message: "Posts fetched successfully",
-      posts: getAllPosts,
-      count: getAllPosts.length,
+      posts: allPosts,
+      pagination: {
+        currentPage: validatedPage,
+        limit: validatedLimit,
+        totalPosts,
+        totalPages,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1
+      }
     });
   } catch (error) {
     logger.error("Error getting all posts...", error);
@@ -234,22 +295,53 @@ export const deletePostById = async (req, res) => {
 
 //get post by user id
 
+
 export const getPostByUserId = async (req, res) => {
   try {
     logger.info("Getting post by user id...");
     const userId = req.params.id;
-
+    
     if (!userId) {
       return res.status(400).json({ message: "User id is required" });
     }
 
-    const getPostByUserId = await db
-      .select()
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const validatedPage = page > 0 ? page : 1;
+    const validatedLimit = limit > 0 ? limit : 9;
+    const offset = (validatedPage - 1) * validatedLimit;
+
+    // Get total count of posts for this user
+    const totalResult = await db
+      .select({ count: sql`count(*)` })
       .from(posts)
       .where(eq(posts.authorId, userId));
-    res
-      .status(200)
-      .json({ message: "Post fetched successfully", post: getPostByUserId });
+
+    const totalPosts = Number(totalResult[0].count);
+    const totalPages = Math.ceil(totalPosts / validatedLimit);
+
+    // Get paginated posts
+    const userPosts = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.authorId, userId))
+      .orderBy(desc(posts.createdAt)) // Ensure consistent ordering
+      .limit(validatedLimit)
+      .offset(offset);
+
+    res.status(200).json({
+      message: "Post fetched successfully",
+      post: userPosts,
+      pagination: {
+        currentPage: validatedPage,
+        limit: validatedLimit,
+        totalPosts,
+        totalPages,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1
+      }
+    });
   } catch (error) {
     logger.error("Error getting post by user id...", error);
     res.status(500).json({ message: "Internal server error" });

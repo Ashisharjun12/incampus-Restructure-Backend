@@ -28,7 +28,8 @@ CREATE TABLE "comments" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"post_id" uuid,
 	"author_id" uuid,
-	"content" text NOT NULL,
+	"content" text,
+	"gif_url" jsonb,
 	"is_edited" boolean DEFAULT false,
 	"comment_likes_count" integer DEFAULT 0,
 	"comment_replies_count" integer DEFAULT 0,
@@ -92,6 +93,18 @@ CREATE TABLE "likes" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "hashtags" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"tag" text NOT NULL,
+	CONSTRAINT "hashtags_tag_unique" UNIQUE("tag")
+);
+--> statement-breakpoint
+CREATE TABLE "post_hashtags" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"post_id" uuid,
+	"hashtag_id" integer
+);
+--> statement-breakpoint
 CREATE TABLE "posts" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"author_id" uuid,
@@ -112,7 +125,8 @@ CREATE TABLE "replies" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"comment_id" uuid,
 	"author_id" uuid,
-	"content" text NOT NULL,
+	"content" text,
+	"gifurl" jsonb,
 	"is_edited" boolean DEFAULT false,
 	"reply_likes_count" integer DEFAULT 0,
 	"created_at" timestamp DEFAULT now(),
@@ -169,12 +183,14 @@ ALTER TABLE "confessions_comments" ADD CONSTRAINT "confessions_comments_confessi
 ALTER TABLE "confessions_comments" ADD CONSTRAINT "confessions_comments_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "confessions_likes" ADD CONSTRAINT "confessions_likes_confession_id_confessions_id_fk" FOREIGN KEY ("confession_id") REFERENCES "public"."confessions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "confessions_likes" ADD CONSTRAINT "confessions_likes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "confession_room" ADD CONSTRAINT "confession_room_college_id_colleges_id_fk" FOREIGN KEY ("college_id") REFERENCES "public"."colleges"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "confession_room" ADD CONSTRAINT "confession_room_college_id_colleges_id_fk" FOREIGN KEY ("college_id") REFERENCES "public"."colleges"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "confessions" ADD CONSTRAINT "confessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "follows" ADD CONSTRAINT "follows_follower_id_users_id_fk" FOREIGN KEY ("follower_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "follows" ADD CONSTRAINT "follows_followee_id_users_id_fk" FOREIGN KEY ("followee_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "likes" ADD CONSTRAINT "likes_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "likes" ADD CONSTRAINT "likes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "post_hashtags" ADD CONSTRAINT "post_hashtags_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "post_hashtags" ADD CONSTRAINT "post_hashtags_hashtag_id_hashtags_id_fk" FOREIGN KEY ("hashtag_id") REFERENCES "public"."hashtags"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "replies" ADD CONSTRAINT "replies_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "replies" ADD CONSTRAINT "replies_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

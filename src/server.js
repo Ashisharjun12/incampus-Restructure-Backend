@@ -18,6 +18,7 @@ import likeRoutes from "./routes/likeRoute.js";
 import commentRoutes from "./routes/commentRoute.js";
 import replyRoutes from "./routes/replyRoute.js";
 import confessionRoutes from "./routes/confessionRoute.js"
+import hasgTagRoutes from "./routes/hashtagRoutes.js"
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use("/api/v1/follow", followRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/reply", replyRoutes);
 app.use("api/v1/confession", confessionRoutes);
+app.use('/api/v1/hashtags', hasgTagRoutes);
 
 
 app.use(errorHandler);

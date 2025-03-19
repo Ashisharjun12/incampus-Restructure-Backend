@@ -21,11 +21,9 @@ router.get("/get-post/:id", getPostById);
 router.get("/get-post-by-author/:id", getPostByAuthorId);
 router.delete("/delete/:id", authenticateUser, deletePostById);
 
-//user post routes
-router.get("/get-post-by-author/:id", authenticateUser, getPostByUserId);
+
+router.get("/user-posts/:id", authenticateUser, getPostByUserId);
 router.put("/update/:id", authenticateUser, updatePostById);
-
-
 
 //save post
 router.post("/:id/save", authenticateUser, savePost);

@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
   }
 });
 
-// The original multer for disk storage (keep this for backward compatibility)
+
 export const upload = multer({ 
   storage: storage,
   fileFilter: (req, file, cb) => {
@@ -43,7 +43,7 @@ const s3Storage = multerS3({
   metadata: function (req, file, cb) {
     cb(null, { 
       fieldName: file.fieldname,
-      mimetype: file.mimetype // Store mimetype in metadata for future reference
+      mimetype: file.mimetype 
     });
   },
   key: function (req, file, cb) {
@@ -101,9 +101,9 @@ export const s3Upload = multer({
     cb(null, true);
   },
   limits: {
-    fileSize: 25 * 1024 * 1024 // Increased to 25MB to handle larger files
+    fileSize: 25 * 1024 * 1024 // 25MB 
   }
 });
 
 
-//multer s3
+
