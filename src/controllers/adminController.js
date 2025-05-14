@@ -198,36 +198,60 @@ export const logoutAdmin = async (req, res) => {
 };
 
 
-export const getAccountDelete = async(req,res)=>{
+export const getAccountDeleteReq = async(req,res)=>{
   try {
-    logger.info("hitting account delete route...")
-          
-    
-  } catch (error) {
-    logger.info("getting error of account delete...",error)
-    
-  }
+    logger.info("hitting account delete route...");
 
+    const userdata = await db.select().from(users).where(eq(users.accountDeletationReq, true));
+    
+    return res.status(200).json({
+      success: true,
+      message: "Account deletion requests fetched successfully",
+      data: userdata
+    });
+  } catch (error) {
+    logger.info("getting error of account delete...",error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in fetching account deletion requests"
+    });
+  }
 }
 
 
 export const AccountDeleteUser = async(req,res)=>{
   try {
-    logger.info("hitting account delelte user....")
+    logger.info("hitting account delete user....")
 
-    const userId = req.params;
+    const userId = req.params.id;
 
-    const getUser = await db.select().from(users).where(eq(users.id,userId))
+    const [getUser] = await db.select().from(users).where(eq(users.id, userId));
 
+    if (!getUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
 
+    if (!getUser.accountDeletationReq) {
+      return res.status(400).json({
+        success: false,
+        message: "User has not requested account deletion"
+      });
+    }
 
+    await db.delete(users).where(eq(users.id, userId));
 
-
-    
+    return res.status(200).json({
+      success: true,
+      message: "User account deleted successfully"
+    });
   } catch (error) {
-    logger.info("error in account delete",error)
-    
+    logger.info("error in account delete", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in deleting user account"
+    });
   }
-
-
 }
