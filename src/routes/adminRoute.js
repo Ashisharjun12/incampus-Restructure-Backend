@@ -1,6 +1,6 @@
 
 import {Router} from "express"
-import {createAdmin, loginAdmin, logoutAdmin} from "../controllers/adminController.js"
+import { AccountDeleteUser, createAdmin, loginAdmin, logoutAdmin} from "../controllers/adminController.js"
 import {authenticateAdmin} from "../middleware/authenticate.js"
 
 
@@ -15,6 +15,8 @@ router.post("/register", createAdmin)
 router.post("/login", loginAdmin)
 
 router.post("/logout", authenticateAdmin, logoutAdmin)
+router.get("/account-delete-req",authenticateAdmin)
+router.post("/delete/:id",authenticateAdmin,AccountDeleteUser)
 
 
 

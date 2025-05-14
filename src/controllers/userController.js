@@ -589,3 +589,84 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+
+
+//sent account delete request to admin
+
+export const sentAccountDeleteReq = async(req,res)=>{
+  try {
+    logger.info("hitting send account delete req....")
+    const userId = req.user.id;
+
+    const [userdata] = await db.select().from(users).where(eq(users.id, userId))
+
+    if(!userdata){
+      return res.status(404).json({
+        success: false,
+        message: "User data not found. Please try again"
+      });
+    }
+
+    // Toggle the accountDeletationReq field
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        accountDeletationReq: !userdata.accountDeletationReq
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return res.status(200).json({
+      success: true,
+      message: updatedUser.accountDeletationReq ? 
+        "Account deletion request sent successfully" : 
+        "Account deletion request cancelled",
+      data: updatedUser
+    });
+
+  } catch (error) {
+    logger.error("Error in sending account deletion request:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in processing account deletion request"
+    });
+  }
+}
+
+
+//date mode enable
+
+export const EnableDateMode = async(req,res)=>{
+  try {
+    logger.info("hitting date mode enable route....")
+    const userId = req.user.id;
+
+    // Check if user exists
+    const [userdata] = await db.select().from(users).where(eq(users.id, userId));
+    if (!userdata) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Toggle date mode
+    const [updatedUser] = await db
+      .update(users)
+      .set({ DateMode: !userdata.DateMode })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return res.status(200).json({
+      success: true,
+      message: updatedUser.DateMode ? "Date mode enabled successfully" : "Date mode disabled successfully",
+      data: updatedUser
+    });
+  } catch (error) {
+    logger.info("error in enabling date mode" , error)
+    return res.status(500).json({
+      success: false,
+      message: "Error in enabling date mode"
+    });
+  }
+}

@@ -1,6 +1,7 @@
 import { admins } from "../models/Admin.js";
 import { eq } from "drizzle-orm";
 import { db } from "../config/database.js";
+import { users } from "../models/User.js";
 import logger from "../utils/logger.js";
 import bcrypt from "bcrypt";
 import {
@@ -195,3 +196,38 @@ export const logoutAdmin = async (req, res) => {
     });
   }
 };
+
+
+export const getAccountDelete = async(req,res)=>{
+  try {
+    logger.info("hitting account delete route...")
+          
+    
+  } catch (error) {
+    logger.info("getting error of account delete...",error)
+    
+  }
+
+}
+
+
+export const AccountDeleteUser = async(req,res)=>{
+  try {
+    logger.info("hitting account delelte user....")
+
+    const userId = req.params;
+
+    const getUser = await db.select().from(users).where(eq(users.id,userId))
+
+
+
+
+
+    
+  } catch (error) {
+    logger.info("error in account delete",error)
+    
+  }
+
+
+}

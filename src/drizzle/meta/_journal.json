@@ -15,6 +15,13 @@
       "when": 1742721609155,
       "tag": "0001_remarkable_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747222753274,
+      "tag": "0002_curious_molly_hayes",
+      "breakpoints": true
     }
   ]
 }

@@ -32,10 +32,12 @@ export const users = pgTable(
     status: StatusEnum('status').default('active'),
     isTemporary: boolean('is_temporary').default(false),
     allowDMs: boolean('allow_dms').default(true),
+    DateMode:boolean('date_mode').default(false),
     followerCount: integer('follower_count').default(0), // Number of followers
     followingCount: integer('following_count').default(0), // Number of users being followed
     passwordResetToken: varchar('password_reset_token', { length: 512 }),
     passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
+    accountDeletationReq:boolean('accountDelete').default(false),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -43,6 +45,7 @@ export const users = pgTable(
     {
       usernameIdx: index('username_idx').on(table.username),
       emailIdx: index('email_idx').on(table.email),
+      datemodeIdx:index('date_idx').on(table.DateMode),
       collegeIdIdx: index('college_id_idx').on(table.collegeId),
       createdAtIdx: index('created_at_idx').on(table.createdAt),
     }   
