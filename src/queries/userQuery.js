@@ -140,3 +140,72 @@ export const mutualCollegeFriends = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const  getOtherCollgeFriends = async(req,res)=>{
+
+  try {
+    logger.info("hitting get other collge frineds controllers...")
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 16; // Show 16 users per page
+    const offset = (page - 1) * limit;
+
+    // Get the user's college ID first
+    const userData = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!userData || userData.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get paginated users and total count
+    const [otherCollegeUsers, totalCount] = await Promise.all([
+      db
+        .select({
+          id: users.id,
+          username: users.username,
+          avatar: users.avatar,
+          verifiedBadge: users.verifiedBadge,
+          collegeName: colleges.name,
+          collegeLogo: colleges.logo,
+          bio: users.bio,
+          collegeLocation: colleges.location,
+          followerCount: users.followerCount,
+        })
+        .from(users)
+        .leftJoin(colleges, eq(users.collegeId, colleges.id))
+        .where(
+          sql`${users.collegeId} != ${userData[0].collegeId} AND ${users.id} != ${userId}`
+        )
+        .limit(limit)
+        .offset(offset),
+
+      // Get total count
+      db
+        .select({ count: sql`count(*)` })
+        .from(users)
+        .where(
+          sql`${users.collegeId} != ${userData[0].collegeId} AND ${users.id} != ${userId}`
+        ),
+    ]);
+
+    res.status(200).json({
+      message: "Other college users fetched successfully",
+      data: otherCollegeUsers,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount[0].count / limit),
+        totalResults: totalCount[0].count,
+        hasMore: otherCollegeUsers.length === limit,
+      },
+    });
+    
+  } catch (error) {
+    logger.error(`Error fetching other college users: ${error.message}`);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

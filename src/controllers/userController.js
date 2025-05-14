@@ -57,8 +57,7 @@ const createActivationToken = (userdata) => {
 export const RegisterUser = async (req, res) => {
   try {
     logger.info("Creating user endpoint hit");
-    const { username, email, password, avatar, gender, age, college } =
-      req.body;
+    const { username, email, password, avatar, gender, age, college } =req.body;
 
     if (
       !username ||
@@ -341,11 +340,15 @@ export const ResendVerificationEmail = async (req, res) => {
 export const ForgotPassword = async (req, res) => {
   try {
     logger.info("Forgot password endpoint hit");
-  } catch (error) {}
+    
+  } catch (error) {
+    res.status(200).json({
+      message: "Password reset email sent successfully",
+    });
 
-  res.status(200).json({
-    message: "Password reset email sent successfully",
-  });
+  }
+
+ 
 };
 
 export const ResetPassword = async (req, res) => {

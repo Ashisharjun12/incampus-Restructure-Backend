@@ -34,6 +34,8 @@ export const users = pgTable(
     allowDMs: boolean('allow_dms').default(true),
     followerCount: integer('follower_count').default(0), // Number of followers
     followingCount: integer('following_count').default(0), // Number of users being followed
+    passwordResetToken: varchar('password_reset_token', { length: 512 }),
+    passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -43,7 +45,7 @@ export const users = pgTable(
       emailIdx: index('email_idx').on(table.email),
       collegeIdIdx: index('college_id_idx').on(table.collegeId),
       createdAtIdx: index('created_at_idx').on(table.createdAt),
-    }
+    }   
   ]
 
 );

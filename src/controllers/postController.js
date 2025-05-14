@@ -126,6 +126,8 @@ export const getAllPosts = async (req, res) => {
     const validatedLimit = limit > 0 ? limit : 12;
     const offset = (validatedPage - 1) * validatedLimit;
 
+    // const userdetails = await 
+
     // Get total count of all posts
     const totalResult = await db
       .select({ count: sql`count(*)` })
@@ -145,6 +147,7 @@ export const getAllPosts = async (req, res) => {
     res.status(200).json({
       message: "Posts fetched successfully",
       posts: allPosts,
+      // collgeId: collgeId,
       pagination: {
         currentPage: validatedPage,
         limit: validatedLimit,
@@ -160,6 +163,63 @@ export const getAllPosts = async (req, res) => {
   }
 };
 
+export const getAllPostBySameCollege = async (req, res) => {
+  try {
+    logger.info("Getting all posts by same college...");
+    
+    // Get current user's college ID from auth token
+    const userId = req.user.id;
+    const [userDetails] = await db.select().from(users).where(eq(users.id, userId));
+    
+    if (!userDetails?.collegeId) {
+      return res.status(400).json({ message: "User college not found" });
+    }
+
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const validatedPage = page > 0 ? page : 1;
+    const validatedLimit = limit > 0 ? limit : 12;
+    const offset = (validatedPage - 1) * validatedLimit;
+
+    // Get total count of posts from same college
+    const totalResult = await db
+      .select({ count: sql`count(*)` })
+      .from(posts)
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .where(eq(users.collegeId, userDetails.collegeId));
+
+    const totalPosts = Number(totalResult[0]?.count || 0);
+    const totalPages = Math.ceil(totalPosts / validatedLimit);
+
+    // Get paginated posts from same college
+    const collegePosts = await db
+      .select()
+      .from(posts)
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .where(eq(users.collegeId, userDetails.collegeId))
+      .orderBy(desc(posts.createdAt))
+      .limit(validatedLimit)
+      .offset(offset);
+
+    res.status(200).json({
+      message: "College posts fetched successfully",
+      posts: collegePosts.map(p => p.posts), // Extract post data
+      pagination: {
+        currentPage: validatedPage,
+        limit: validatedLimit,
+        totalPosts,
+        totalPages,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1
+      }
+    });
+  } catch (error) {
+    logger.error("Error getting posts by same college...", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 //get post by id
 
 export const getPostById = async (req, res) => {
@@ -167,7 +227,7 @@ export const getPostById = async (req, res) => {
     logger.info("Getting post by id...");
 
     const postId = req.params.id;
-    const userId = req.user?.id; // Get current user id if authenticated
+    const userId = req.user?.id; 
 
     if (!postId) {
       return res.status(400).json({ message: "Post id is required" });
@@ -233,14 +293,43 @@ export const getPostByAuthorId = async (req, res) => {
       return res.status(400).json({ message: "Author id is required" });
     }
 
-    const getPostByAuthorId = await db
-      .select()
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const validatedPage = page > 0 ? page : 1;
+    const validatedLimit = limit > 0 ? limit : 9;
+    const offset = (validatedPage - 1) * validatedLimit;
+
+    // Get total count of posts for this author
+    const totalResult = await db
+      .select({ count: sql`count(*)` })
       .from(posts)
       .where(eq(posts.authorId, authorId));
 
-    res
-      .status(200)
-      .json({ message: "Post fetched successfully", post: getPostByAuthorId });
+    const totalPosts = Number(totalResult[0].count);
+    const totalPages = Math.ceil(totalPosts / validatedLimit);
+
+    // Get paginated posts
+    const authorPosts = await db
+      .select()
+      .from(posts)
+      .where(eq(posts.authorId, authorId))
+      .orderBy(desc(posts.createdAt))
+      .limit(validatedLimit)
+      .offset(offset);
+
+    res.status(200).json({
+      message: "Posts fetched successfully",
+      posts: authorPosts,
+      pagination: {
+        currentPage: validatedPage,
+        limit: validatedLimit,
+        totalPosts,
+        totalPages,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1
+      }
+    });
   } catch (error) {
     logger.error("Error getting post by author id...", error);
     res.status(500).json({ message: "Internal server error" });

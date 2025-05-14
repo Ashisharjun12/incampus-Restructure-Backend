@@ -8,6 +8,7 @@ import {
   getPostByUserId,
   updatePostById,
   savePost,
+  getAllPostBySameCollege,
 } from "../controllers/postController.js";
 import { authenticateUser } from "../middleware/authenticate.js";
 import { s3Upload } from "../utils/multer.js";
@@ -20,6 +21,7 @@ router.get("/get-all", getAllPosts);
 router.get("/get-post/:id", getPostById);
 router.get("/get-post-by-author/:id", getPostByAuthorId);
 router.delete("/delete/:id", authenticateUser, deletePostById);
+router.get("/get-all-posts-same-college",authenticateUser,getAllPostBySameCollege)
 
 
 router.get("/user-posts/:id", authenticateUser, getPostByUserId);

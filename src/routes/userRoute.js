@@ -13,7 +13,7 @@ import {
   getUserProfile,
   updateProfile,
 } from "../controllers/userController.js";
-import { searchUser, mutualCollegeFriends } from "../queries/userQuery.js";
+import { searchUser, mutualCollegeFriends, getOtherCollgeFriends } from "../queries/userQuery.js";
 import { authenticateUser } from "../middleware/authenticate.js";
 
 const router = Router();
@@ -33,6 +33,7 @@ router.get("/search", authenticateUser, searchUser);
 router.get("/profile/:id", authenticateUser, getUserProfile);
 router.put("/update-profile/:id", authenticateUser, updateProfile);
 router.get("/mutual-college-friends", authenticateUser, mutualCollegeFriends);
+router.get("/other-collge-friends" , authenticateUser , getOtherCollgeFriends)
 
 
 
