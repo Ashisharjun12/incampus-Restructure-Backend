@@ -14,6 +14,7 @@ import {
   updateProfile,
   sentAccountDeleteReq,
   EnableDateMode,
+  verifyForgotPasswordOtp
 } from "../controllers/userController.js";
 import { searchUser, mutualCollegeFriends, getOtherCollgeFriends } from "../queries/userQuery.js";
 import { authenticateUser } from "../middleware/authenticate.js";
@@ -31,6 +32,7 @@ router.post("/logout", authenticateUser, LogoutUser);
 router.get("/generate-username", generateUsername);
 router.post('/sent-account-delete-req',authenticateUser,sentAccountDeleteReq)
 router.post('/enable-date-mode',authenticateUser,EnableDateMode)
+router.post("/verify-forgot-password-otp", verifyForgotPasswordOtp);
 
 //queries
 router.get("/search", authenticateUser, searchUser);

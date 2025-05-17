@@ -442,8 +442,77 @@ export const getPostByUserId = async (req, res) => {
 export const updatePostById = async (req, res) => {
   try {
     logger.info("Updating post by id...");
-    // Implementation needed
-    res.status(501).json({ message: "Feature not implemented yet" });
+    const postId = req.params.id;
+    const userId = req.user.id;
+    const { content, visibility } = req.body;
+    const files = req.files;
+    let keepMedia = [];
+    if (req.body.keepMedia) {
+      try {
+        keepMedia = JSON.parse(req.body.keepMedia);
+      } catch (e) {
+        logger.error('Invalid keepMedia JSON:', req.body.keepMedia);
+        return res.status(400).json({ message: 'Invalid keepMedia format' });
+      }
+    }
+
+    if (!postId) {
+      return res.status(400).json({ message: "Post id is required" });
+    }
+
+    // Get the post
+    const [post] = await db.select().from(posts).where(eq(posts.id, postId));
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    if (post.authorId !== userId) {
+      return res.status(403).json({ message: "Unauthorized: not your post" });
+    }
+
+    let mediaurls = keepMedia.length > 0 ? keepMedia : [];
+    // Delete removed images from S3
+    if (post.media && post.media.length > 0) {
+      for (const oldMedia of post.media) {
+        const stillKept = keepMedia.some(k => (k.key || k) === (oldMedia.key || oldMedia));
+        if (!stillKept && oldMedia.key) {
+          try {
+            logger.info(`Deleting removed S3 object: ${oldMedia.key}`);
+            await deleteObject(oldMedia.key);
+          } catch (error) {
+            logger.error(`Error deleting S3 object ${oldMedia.key}:`, error);
+          }
+        }
+      }
+    }
+    // Add new media uploads
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (!file.location || !file.key) {
+          logger.error("Invalid S3 file object:", file);
+          return res.status(500).json({ message: "Error with file upload to S3" });
+        }
+        const fileType = file.mimetype.startsWith('video/') ? 'video' : file.mimetype.startsWith('audio/') ? 'audio' : 'image';
+        mediaurls.push({
+          type: fileType,
+          url: file.location,
+          key: file.key,
+          mimetype: file.mimetype
+        });
+      }
+    }
+
+    // Update the post
+    const [updatedPost] = await db.update(posts)
+      .set({
+        content: content !== undefined ? content : post.content,
+        media: mediaurls,
+        visibility: visibility !== undefined ? visibility : post.visibility,
+        updatedAt: new Date()
+      })
+      .where(eq(posts.id, postId))
+      .returning();
+
+    return res.status(200).json({ message: "Post updated successfully", post: updatedPost });
   } catch (error) {
     logger.error("Error updating post by id...", error);
     res.status(500).json({ message: "Internal server error" });

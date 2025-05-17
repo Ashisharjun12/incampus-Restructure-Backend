@@ -4,7 +4,7 @@ import { colleges } from "../models/College.js";
 import { users } from "../models/User.js";
 import { eq, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
-import { sendVerificationEmail } from "../services/emaiService.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../services/emaiService.js";
 import { posts } from "../models/Post.js";
 import jwt from "jsonwebtoken";
 import {
@@ -18,6 +18,7 @@ import {
   animals,
 } from "unique-names-generator";
 import { aj } from "../security/email.js";
+import crypto from 'crypto';
 
 const generateAccessRefreshToken = async (userPayload) => {
   logger.info("Generating access and refresh token user...");
@@ -340,15 +341,42 @@ export const ResendVerificationEmail = async (req, res) => {
 export const ForgotPassword = async (req, res) => {
   try {
     logger.info("Forgot password endpoint hit");
-    
-  } catch (error) {
-    res.status(200).json({
-      message: "Password reset email sent successfully",
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await sendPasswordResetEmail(user.email, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email"
     });
 
+  } catch (error) {
+    logger.error("Error in forgot password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error processing request"
+    });
   }
-
- 
 };
 
 export const ResetPassword = async (req, res) => {
@@ -670,3 +698,31 @@ export const EnableDateMode = async(req,res)=>{
     });
   }
 }
+
+export const verifyForgotPasswordOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: "Email and OTP are required" });
+    }
+    // Find user by email
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    // Check OTP and expiry
+    if (
+      user.passwordResetToken !== otp ||
+      !user.passwordResetTokenExpiry ||
+      new Date(user.passwordResetTokenExpiry) < new Date()
+    ) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    }
+    // Optionally clear OTP after verification
+    await db.update(users).set({ passwordResetToken: null, passwordResetTokenExpiry: null }).where(eq(users.id, user.id));
+    return res.status(200).json({ success: true, message: "OTP verified successfully" });
+  } catch (error) {
+    logger.error("Error in verifyForgotPasswordOtp:", error);
+    return res.status(500).json({ success: false, message: "Error verifying OTP" });
+  }
+};

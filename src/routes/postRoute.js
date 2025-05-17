@@ -25,7 +25,7 @@ router.get("/get-all-posts-same-college",authenticateUser,getAllPostBySameColleg
 
 
 router.get("/user-posts/:id", authenticateUser, getPostByUserId);
-router.put("/update/:id", authenticateUser, updatePostById);
+router.put("/update/:id", authenticateUser, s3Upload.array("media"), updatePostById);
 
 //save post
 router.post("/:id/save", authenticateUser, savePost);

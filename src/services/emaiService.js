@@ -61,6 +61,53 @@ export const sendVerificationEmail = async (email, otp) => {
   }
 };
 
+// Function to send password reset email
+export const sendPasswordResetEmail = async (email, resetToken) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Reset Your Password - InCampus',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(to right, #2563eb, #1d4ed8); padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">InCampus</h1>
+          </div>
+          
+          <div style="background: #1a1a1a; padding: 30px; color: white; border-radius: 0 0 10px 10px;">
+            <h2 style="margin-top: 0; text-align: center;">Reset Your Password</h2>
+            
+            <p style="color: #9ca3af; line-height: 1.6;">
+              We received a request to reset your password. Use the code below to reset your password:
+            </p>
+            
+            <div style="background: #262626; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
+              <span style="font-size: 32px; letter-spacing: 8px; font-family: monospace; color: #60a5fa;">
+                ${resetToken}
+              </span>
+            </div>
+            
+            <p style="color: #9ca3af; line-height: 1.6;">
+              This code will expire in 15 minutes. If you didn't request this password reset, you can safely ignore this email.
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px;">
+              <p>© ${new Date().getFullYear()} InCampus. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent successfully');
+
+  } catch (error) {
+    console.error('Send password reset email error:', error);
+    throw new Error('Failed to send password reset email');
+  }
+};
+
 // Verify transporter connection
 transporter.verify((error, success) => {
   if (error) {
