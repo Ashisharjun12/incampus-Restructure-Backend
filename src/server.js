@@ -26,7 +26,7 @@ const app = express();
 const PORT = _config.PORT;
 
 app.use(cors({
-origin: ["incampus-restructure-ognic1ng2.vercel.app" , "https://hammerhead-app-zbsuw.ondigitalocean.app"],
+origin: ["https://incampus-restructure-web.vercel.app" , "https://hammerhead-app-zbsuw.ondigitalocean.app"],
 }));
 app.use(express.json());
 app.use(cookieParser());
