@@ -54,7 +54,7 @@ app.get("/health", (req, res) => {
 
 
 //proxy
-app.use("/api/v1/message", authenticateUser,expressProxy("http://localhost:3002"))
+app.use("/api/v1/message", authenticateUser,expressProxy("https://hammerhead-app-zbsuw.ondigitalocean.app"))
 
 //routes
 
