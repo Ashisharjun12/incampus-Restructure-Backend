@@ -26,7 +26,16 @@ const app = express();
 const PORT = _config.PORT;
 
 app.use(cors({
-origin: ["https://incampus-restructure-web.vercel.app" , "https://hammerhead-app-zbsuw.ondigitalocean.app"],
+  origin: [
+    "https://incampus-restructure-web.vercel.app",
+    "https://hammerhead-app-zbsuw.ondigitalocean.app",
+    "https://incampus-restructure-rm7whpfa8.vercel.app",
+    "http://localhost:3000",
+    "https://hammerhead-app-zbsuw.ondigitalocean.app"
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 app.use(express.json());
 app.use(cookieParser());
